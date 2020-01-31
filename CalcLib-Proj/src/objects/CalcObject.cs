@@ -1,5 +1,5 @@
 namespace Nixill.CalcLib.Objects {
-  public class CalcObject {
-
+  public abstract class CalcObject {
+    public abstract CalcValue GetValue();
   }
 }
