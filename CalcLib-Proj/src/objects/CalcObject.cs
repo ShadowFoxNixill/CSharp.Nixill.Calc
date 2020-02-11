@@ -1,7 +1,8 @@
 namespace Nixill.CalcLib.Objects {
   public abstract class CalcObject {
     public abstract CalcValue GetValue();
-    public abstract override string ToString();
+    public sealed override string ToString() => ToString(1);
+    public abstract string ToString(int level);
     public abstract string ToCode();
   }
 }

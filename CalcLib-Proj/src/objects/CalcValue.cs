@@ -19,7 +19,7 @@ namespace Nixill.CalcLib.Objects {
     public static implicit operator CalcInteger(long l) => new CalcInteger(l);
     public static explicit operator CalcInteger(CalcDecimal d) => new CalcInteger((long)(d.Value));
 
-    public override string ToString() => Value.ToString();
+    public override string ToString(int level) => Value.ToString();
     public override string ToCode() {
       if (Value >= 0)
         return Value.ToString();
@@ -42,7 +42,7 @@ namespace Nixill.CalcLib.Objects {
     public static implicit operator CalcDecimal(double d) => new CalcDecimal(d);
     public static explicit operator CalcDecimal(CalcInteger i) => new CalcDecimal((double)(i.Value));
 
-    public override string ToString() => Value.ToString(DISPLAY_FORMAT);
+    public override string ToString(int level) => Value.ToString(DISPLAY_FORMAT);
     public override string ToCode() => Value.ToString(CODE_FORMAT);
   }
 
@@ -59,6 +59,20 @@ namespace Nixill.CalcLib.Objects {
       for (int i = 0; i < list.Length; i++) {
         _list[i] = list[i];
       }
+    }
+
+    public override string ToString(int level) {
+      string ret = "";
+    }
+
+    public bool HasString() {
+      foreach (CalcValue val in _list) {
+        if (val is CalcString) return true;
+        else if (val is CalcList lst) {
+          if (lst.HasString()) return true;
+        }
+      }
+      return false;
     }
   }
 
