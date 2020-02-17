@@ -63,6 +63,8 @@ namespace Nixill.CalcLib.Objects {
 
     public override string ToString(int level) {
       string ret = "";
+
+      
     }
 
     public bool HasString() {
