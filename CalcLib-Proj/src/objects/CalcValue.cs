@@ -1,7 +1,6 @@
-using System.Globalization;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Collections;
+using Nixill.CalcLib.Exception;
 
 namespace Nixill.CalcLib.Objects {
   public abstract class CalcValue : CalcObject {
@@ -62,9 +61,30 @@ namespace Nixill.CalcLib.Objects {
     }
 
     public override string ToString(int level) {
-      string ret = "";
+      string ret;
 
-      
+      if (!HasString()) ret = "[";
+      else ret = Sum() + " [";
+
+      if (level == 0) ret += " ... ";
+      else {
+        foreach (CalcValue cv in _list) {
+          ret += cv.ToString(level - 1) + ", ";
+        }
+        ret = ret.Substring(0, ret.Length - 2);
+      }
+
+      return ret + "]";
+    }
+
+    public override string ToCode() {
+      string ret = "[";
+
+      foreach (CalcValue cv in _list) {
+        ret += cv.ToCode() + ",";
+      }
+
+      return ret.Substring(0, ret.Length - 1) + "]";
     }
 
     public bool HasString() {
@@ -75,6 +95,17 @@ namespace Nixill.CalcLib.Objects {
         }
       }
       return false;
+    }
+
+    public double Sum() {
+      double sum = 0;
+      foreach (CalcValue val in _list) {
+        if (val is CalcString) throw new CalcException("Strings cannot be summed.");
+        if (val is CalcList cl) sum += cl.Sum();
+        else if (val is CalcDecimal cd) sum += cd.Value;
+        else if (val is CalcInteger ci) sum += (double)ci.Value;
+      }
+      return sum;
     }
   }
 
@@ -87,5 +118,13 @@ namespace Nixill.CalcLib.Objects {
 
     public static implicit operator string(CalcString s) => s.Value;
     public static implicit operator CalcString(string s) => new CalcString(s);
+
+    public override string ToString(int level) {
+      return Value;
+    }
+
+    public override string ToCode() {
+      return "\"" + Value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+    }
   }
 }
