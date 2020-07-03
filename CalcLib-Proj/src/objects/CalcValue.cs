@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using Nixill.CalcLib.Exception;
@@ -7,7 +8,7 @@ namespace Nixill.CalcLib.Objects {
     public override CalcValue GetValue() => this;
   }
 
-  public class CalcInteger : CalcValue {
+  public class CalcInteger : CalcValue, IComparable<CalcInteger>, IComparable<long>, IComparable<CalcDecimal>, IComparable<double> {
     public long Value { get; }
 
     public CalcInteger(long value) {
@@ -25,9 +26,22 @@ namespace Nixill.CalcLib.Objects {
       else
         return "(" + Value.ToString() + ")";
     }
+
+    public override bool Equals(object other) {
+      if (other is CalcInteger i) return Value == i.Value;
+      if (other is CalcDecimal d) return Value == d.Value;
+      return false;
+    }
+
+    public override int GetHashCode() => Value.GetHashCode();
+
+    public int CompareTo(CalcInteger other) => Value.CompareTo(other.Value);
+    public int CompareTo(long other) => Value.CompareTo(other);
+    public int CompareTo(CalcDecimal other) => Value.CompareTo(other.Value);
+    public int CompareTo(double other) => Value.CompareTo(other);
   }
 
-  public class CalcDecimal : CalcValue {
+  public class CalcDecimal : CalcValue, IComparable<CalcDecimal>, IComparable<double>, IComparable<CalcInteger>, IComparable<long> {
     private const string DISPLAY_FORMAT = "0.###;-0.###";
     private const string CODE_FORMAT = "0.###############;(-0.###############)";
 
@@ -43,6 +57,19 @@ namespace Nixill.CalcLib.Objects {
 
     public override string ToString(int level) => Value.ToString(DISPLAY_FORMAT);
     public override string ToCode() => Value.ToString(CODE_FORMAT);
+
+    public override bool Equals(object other) {
+      if (other is CalcInteger i) return Value == i.Value;
+      if (other is CalcDecimal d) return Value == d.Value;
+      return false;
+    }
+
+    public override int GetHashCode() => Value.GetHashCode();
+
+    public int CompareTo(CalcDecimal other) => Value.CompareTo(other);
+    public int CompareTo(double other) => Value.CompareTo(other);
+    public int CompareTo(CalcInteger other) => Value.CompareTo(other);
+    public int CompareTo(long other) => Value.CompareTo(other);
   }
 
   public class CalcList : CalcValue, IEnumerable<CalcValue> {
@@ -107,9 +134,28 @@ namespace Nixill.CalcLib.Objects {
       }
       return sum;
     }
+
+    public override bool Equals(object other) {
+      if (!(other is CalcList list)) return false;
+      if (Count != list.Count) return false;
+
+      for (int i = 0; i < Count; i++) {
+        if (!(_list[i].Equals(list[i]))) return false;
+      }
+
+      return true;
+    }
+
+    public override int GetHashCode() {
+      int hash = 0;
+      foreach (CalcValue val in _list) {
+        hash ^= val.GetHashCode();
+      }
+      return hash;
+    }
   }
 
-  public class CalcString : CalcValue {
+  public class CalcString : CalcValue, IComparable<CalcString>, IComparable<String> {
     public string Value { get; }
 
     public CalcString(string value) {
@@ -126,5 +172,15 @@ namespace Nixill.CalcLib.Objects {
     public override string ToCode() {
       return "\"" + Value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
     }
+
+    public override bool Equals(object other) {
+      if (!(other is CalcString str)) return false;
+      return Value == str.Value;
+    }
+
+    public override int GetHashCode() => Value.GetHashCode();
+
+    public int CompareTo(string other) => Value.CompareTo(other);
+    public int CompareTo(CalcString other) => Value.CompareTo(other);
   }
 }

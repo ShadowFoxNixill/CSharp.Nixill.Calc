@@ -38,11 +38,33 @@ namespace Nixill.CalcLib.Objects {
       if (Params.Count >= 1) {
         if (level == 0) ret += ", ...";
         else foreach (CalcObject obj in Params) {
-            ret += ", " + obj.ToCode();
+            ret += ", " + obj.ToString(level - 1);
           }
       }
 
       return ret + "}";
+    }
+  }
+
+  public class CalcListExpression : CalcExpression {
+    public override bool Equals(object other) {
+      throw new NotImplementedException();
+    }
+
+    public override int GetHashCode() {
+      throw new NotImplementedException();
+    }
+
+    public override CalcValue GetValue() {
+      throw new NotImplementedException();
+    }
+
+    public override string ToCode() {
+      throw new NotImplementedException();
+    }
+
+    public override string ToString(int level) {
+      throw new NotImplementedException();
     }
   }
 }
