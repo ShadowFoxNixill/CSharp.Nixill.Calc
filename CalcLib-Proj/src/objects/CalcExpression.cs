@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Nixill.CalcLib.Functions;
 using Nixill.CalcLib.Varaibles;
+using Nixill.CalcLib.Exception;
 
 namespace Nixill.CalcLib.Objects {
   public abstract class CalcExpression : CalcObject { }
@@ -21,7 +22,7 @@ namespace Nixill.CalcLib.Objects {
 
     public override int GetHashCode() => ToCode().GetHashCode();
 
-    internal override CalcValue GetValue(CLLocalStore vars) =>
+    internal override CalcValue GetValue(CLLocalStore vars, object context = null) =>
       Function.FunctionDef.Invoke(Params);
 
     public override string ToCode() {
@@ -63,7 +64,7 @@ namespace Nixill.CalcLib.Objects {
       }
     }
 
-    internal override CalcValue GetValue(CLLocalStore vars) {
+    internal override CalcValue GetValue(CLLocalStore vars, object context = null) {
       CalcValue[] ret = new CalcValue[_list.Length];
 
       for (int i = 0; i < _list.Length; i++) {
@@ -134,11 +135,23 @@ namespace Nixill.CalcLib.Objects {
 
     public override int GetHashCode() => ToCode().GetHashCode();
 
-    public CalcObject GetObject() => Variables.Load(Name, (Params.Length > 0) ? Params[0] : null);
+    public CalcObject GetObject(CLLocalStore vars = null, object context = null) {
+      CalcObject ret = null;
 
-    internal override CalcValue GetValue(CLLocalStore vars) {
-      CalcObject obj = GetObject();
+      if (Name.StartsWith("*") || Name.StartsWith("^")) {
+        if (!(vars.ContainsVar(Name))) throw new CalcException("No variable named " + Name + " exists.");
+        else return vars[Name];
+      }
 
+      int count = 0;
+      if (Int32.TryParse(Name, out count)) {
+        if (vars.VarCount > count)
+      }
+    }
+
+    internal override CalcValue GetValue(CLLocalStore vars, object context = null) {
+      CalcObject obj = GetObject(vars, context);
+      return obj.GetValue();
     }
 
     public override string ToCode() {

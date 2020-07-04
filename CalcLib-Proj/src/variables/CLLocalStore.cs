@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 
@@ -14,5 +15,33 @@ namespace Nixill.CalcLib.Varaibles {
         else Params.Add(value);
       }
     }
+
+    public CLLocalStore() { }
+
+    public CLLocalStore(List<CalcObject> pars) {
+      Params = new List<CalcObject>(pars);
+    }
+
+    public CLLocalStore(Dictionary<string, CalcObject> vars) {
+      Vars = new Dictionary<string, CalcObject>(vars);
+    }
+
+    public CLLocalStore(List<CalcObject> pars, Dictionary<string, CalcObject> vars) {
+      Params = new List<CalcObject>(pars);
+      Vars = new Dictionary<string, CalcObject>(vars);
+    }
+
+    public CLLocalStore(CalcObject[] pars) {
+      Params = new List<CalcObject>(pars);
+    }
+
+    public CLLocalStore(CalcObject[] pars, Dictionary<string, CalcObject> vars) {
+      Params = new List<CalcObject>(pars);
+      Vars = new Dictionary<string, CalcObject>(vars);
+    }
+
+    public bool ContainsVar(string name) => Vars.ContainsKey(name);
+    public int VarCount => Vars.Count;
+    public int ParamCount => Params.Count;
   }
 }
