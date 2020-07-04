@@ -6,6 +6,9 @@ namespace Nixill.CalcLib.Varaibles {
   internal class CLLocalStore {
     private Dictionary<string, CalcObject> Vars = new Dictionary<string, CalcObject>();
     private List<CalcObject> Params = new List<CalcObject>();
+    public bool ContainsVar(string name) => Vars.ContainsKey(name);
+    public int VarCount => Vars.Count;
+    public int ParamCount => Params.Count;
 
     public CalcObject this[string index] { get => Vars[index]; set => Vars[index] = value; }
     public CalcObject this[int index] {
@@ -15,6 +18,8 @@ namespace Nixill.CalcLib.Varaibles {
         else Params.Add(value);
       }
     }
+
+    public CalcObject[] CopyParams() => Params.ToArray();
 
     public CLLocalStore() { }
 
@@ -39,9 +44,5 @@ namespace Nixill.CalcLib.Varaibles {
       Params = new List<CalcObject>(pars);
       Vars = new Dictionary<string, CalcObject>(vars);
     }
-
-    public bool ContainsVar(string name) => Vars.ContainsKey(name);
-    public int VarCount => Vars.Count;
-    public int ParamCount => Params.Count;
   }
 }

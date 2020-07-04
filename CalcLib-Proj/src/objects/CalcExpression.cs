@@ -135,9 +135,9 @@ namespace Nixill.CalcLib.Objects {
 
     public override int GetHashCode() => ToCode().GetHashCode();
 
-    public CalcObject GetObject(CLLocalStore vars = null, object context = null) {
-      CalcObject ret = null;
+    public CalcObject GetObject(object context = null) => GetObject(new CLLocalStore(), context);
 
+    internal CalcObject GetObject(CLLocalStore vars = null, object context = null) {
       if (Name.StartsWith("*") || Name.StartsWith("^")) {
         if (!(vars.ContainsVar(Name))) throw new CalcException("No variable named " + Name + " exists.");
         else return vars[Name];
@@ -145,8 +145,19 @@ namespace Nixill.CalcLib.Objects {
 
       int count = 0;
       if (Int32.TryParse(Name, out count)) {
-        if (vars.VarCount > count)
+        if (vars.VarCount > count) return vars[count];
+        else if (Params.Length > 0) return Params[1];
+        else throw new CalcException("No parameter #" + count + " exists.");
       }
+
+      if (Name == "...") {
+        return new CalcListExpression(vars.CopyParams());
+      }
+
+      CalcObject ret = CLVariables.Load(Name, context);
+      if (ret != null) return ret;
+
+      throw new CalcException("No variable named " + Name + " exists.");
     }
 
     internal override CalcValue GetValue(CLLocalStore vars, object context = null) {
@@ -155,10 +166,46 @@ namespace Nixill.CalcLib.Objects {
     }
 
     public override string ToCode() {
+      string ret = "{" + Name;
+
+      foreach (CalcObject obj in Params) {
+        ret += "," + obj.ToCode();
+      }
+
+      return ret + "}";
+    }
+
+    public override string ToString(int level) {
+      string ret = "{" + Name;
+
+      foreach (CalcObject obj in Params) {
+        ret += ", " + obj.ToString(level - 1);
+      }
+
+      return ret + "}";
+    }
+  }
+
+  public class CalcOperation : CalcExpression {
+
+
+    public override bool Equals(object other) {
+      if (!(other is CalcOperation oper)) return false;
+
+      return ToCode() == oper.ToCode();
+    }
+
+    public override int GetHashCode() => ToCode().GetHashCode();
+
+    public override string ToCode() {
       throw new NotImplementedException();
     }
 
     public override string ToString(int level) {
+      throw new NotImplementedException();
+    }
+
+    internal override CalcValue GetValue(CLLocalStore store, object context = null) {
       throw new NotImplementedException();
     }
   }
