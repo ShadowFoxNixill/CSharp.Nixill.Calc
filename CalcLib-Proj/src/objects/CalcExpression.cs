@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Nixill.CalcLib.Functions;
+using Nixill.CalcLib.Varaibles;
 
 namespace Nixill.CalcLib.Objects {
   public abstract class CalcExpression : CalcObject { }
@@ -20,7 +21,7 @@ namespace Nixill.CalcLib.Objects {
 
     public override int GetHashCode() => ToCode().GetHashCode();
 
-    public override CalcValue GetValue() =>
+    internal override CalcValue GetValue(CLLocalStore vars) =>
       Function.FunctionDef.Invoke(Params);
 
     public override string ToCode() {
@@ -62,11 +63,11 @@ namespace Nixill.CalcLib.Objects {
       }
     }
 
-    public override CalcValue GetValue() {
+    internal override CalcValue GetValue(CLLocalStore vars) {
       CalcValue[] ret = new CalcValue[_list.Length];
 
       for (int i = 0; i < _list.Length; i++) {
-        ret[i] = _list[i].GetValue();
+        ret[i] = _list[i].GetValue(vars);
       }
 
       return new CalcList(ret);
@@ -120,6 +121,11 @@ namespace Nixill.CalcLib.Objects {
     public string Name { get; private set; }
     CalcObject[] Params;
 
+    public CalcFunction(string name, CalcObject[] pars) {
+      Name = name;
+      Params = pars;
+    }
+
     public override bool Equals(object other) {
       if (!(other is CalcFunction func)) return false;
 
@@ -128,12 +134,11 @@ namespace Nixill.CalcLib.Objects {
 
     public override int GetHashCode() => ToCode().GetHashCode();
 
-    public CalcObject GetObject() {
+    public CalcObject GetObject() => Variables.Load(Name, (Params.Length > 0) ? Params[0] : null);
 
-    }
+    internal override CalcValue GetValue(CLLocalStore vars) {
+      CalcObject obj = GetObject();
 
-    public override CalcValue GetValue() {
-      throw new NotImplementedException();
     }
 
     public override string ToCode() {

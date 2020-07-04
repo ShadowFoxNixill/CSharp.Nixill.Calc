@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using Nixill.CalcLib.Exception;
+using Nixill.CalcLib.Varaibles;
 
 namespace Nixill.CalcLib.Objects {
-  public abstract class CalcObject : CalcObject {
-    public override CalcObject GetValue() => this;
+  public abstract class CalcValue : CalcObject {
+    internal override CalcValue GetValue(CLLocalStore vars) => this;
+    public new CalcValue GetValue() => this;
   }
 
-  public class CalcInteger : CalcObject, IComparable<CalcInteger>, IComparable<long>, IComparable<CalcDecimal>, IComparable<double> {
+  public class CalcInteger : CalcValue, IComparable<CalcInteger>, IComparable<long>, IComparable<CalcDecimal>, IComparable<double> {
     public long Value { get; }
 
     public CalcInteger(long value) {
@@ -41,7 +43,7 @@ namespace Nixill.CalcLib.Objects {
     public int CompareTo(double other) => Value.CompareTo(other);
   }
 
-  public class CalcDecimal : CalcObject, IComparable<CalcDecimal>, IComparable<double>, IComparable<CalcInteger>, IComparable<long> {
+  public class CalcDecimal : CalcValue, IComparable<CalcDecimal>, IComparable<double>, IComparable<CalcInteger>, IComparable<long> {
     private const string DISPLAY_FORMAT = "0.###;-0.###";
     private const string CODE_FORMAT = "0.###############;(-0.###############)";
 
@@ -72,16 +74,16 @@ namespace Nixill.CalcLib.Objects {
     public int CompareTo(long other) => Value.CompareTo(other);
   }
 
-  public class CalcList : CalcObject, IEnumerable<CalcObject> {
-    private CalcObject[] _list;
-    public CalcObject this[int index] => _list[index];
+  public class CalcList : CalcValue, IEnumerable<CalcValue> {
+    private CalcValue[] _list;
+    public CalcValue this[int index] => _list[index];
     public int Count => _list.Length;
 
-    public IEnumerator<CalcObject> GetEnumerator() => ((IEnumerable<CalcObject>)_list).GetEnumerator();
+    public IEnumerator<CalcValue> GetEnumerator() => ((IEnumerable<CalcValue>)_list).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_list).GetEnumerator();
 
-    public CalcList(CalcObject[] list) {
-      _list = new CalcObject[list.Length];
+    public CalcList(CalcValue[] list) {
+      _list = new CalcValue[list.Length];
       for (int i = 0; i < list.Length; i++) {
         _list[i] = list[i];
       }
@@ -95,7 +97,7 @@ namespace Nixill.CalcLib.Objects {
 
       if (level == 0) ret += " ... ";
       else {
-        foreach (CalcObject cv in _list) {
+        foreach (CalcValue cv in _list) {
           ret += cv.ToString(level - 1) + ", ";
         }
         ret = ret.Substring(0, ret.Length - 2);
@@ -107,7 +109,7 @@ namespace Nixill.CalcLib.Objects {
     public override string ToCode() {
       string ret = "[";
 
-      foreach (CalcObject cv in _list) {
+      foreach (CalcValue cv in _list) {
         ret += cv.ToCode() + ",";
       }
 
@@ -115,7 +117,7 @@ namespace Nixill.CalcLib.Objects {
     }
 
     public bool HasString() {
-      foreach (CalcObject val in _list) {
+      foreach (CalcValue val in _list) {
         if (val is CalcString) return true;
         else if (val is CalcList lst) {
           if (lst.HasString()) return true;
@@ -126,7 +128,7 @@ namespace Nixill.CalcLib.Objects {
 
     public double Sum() {
       double sum = 0;
-      foreach (CalcObject val in _list) {
+      foreach (CalcValue val in _list) {
         if (val is CalcString) throw new CalcException("Strings cannot be summed.");
         if (val is CalcList cl) sum += cl.Sum();
         else if (val is CalcDecimal cd) sum += cd.Value;
@@ -148,14 +150,14 @@ namespace Nixill.CalcLib.Objects {
 
     public override int GetHashCode() {
       int hash = 0;
-      foreach (CalcObject val in _list) {
+      foreach (CalcValue val in _list) {
         hash ^= val.GetHashCode();
       }
       return hash;
     }
   }
 
-  public class CalcString : CalcObject, IComparable<CalcString>, IComparable<String> {
+  public class CalcString : CalcValue, IComparable<CalcString>, IComparable<String> {
     public string Value { get; }
 
     public CalcString(string value) {
