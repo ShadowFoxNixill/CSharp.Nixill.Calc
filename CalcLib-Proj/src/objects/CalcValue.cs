@@ -9,68 +9,33 @@ namespace Nixill.CalcLib.Objects {
     public sealed override CalcValue GetValue(CLLocalStore vars, object context = null) => this;
   }
 
-  public class CalcInteger : CalcValue, IComparable<CalcInteger>, IComparable<long>, IComparable<CalcDecimal>, IComparable<double> {
-    public long Value { get; }
-
-    public CalcInteger(long value) {
-      Value = value;
-    }
-
-    public static implicit operator long(CalcInteger i) => i.Value;
-    public static implicit operator CalcInteger(long l) => new CalcInteger(l);
-    public static explicit operator CalcInteger(CalcDecimal d) => new CalcInteger((long)(d.Value));
-
-    public override string ToString(int level) => Value.ToString();
-    public override string ToCode() {
-      if (Value >= 0)
-        return Value.ToString();
-      else
-        return "(" + Value.ToString() + ")";
-    }
-
-    public override bool Equals(object other) {
-      if (other is CalcInteger i) return Value == i.Value;
-      if (other is CalcDecimal d) return Value == d.Value;
-      return false;
-    }
-
-    public override int GetHashCode() => Value.GetHashCode();
-
-    public int CompareTo(CalcInteger other) => Value.CompareTo(other.Value);
-    public int CompareTo(long other) => Value.CompareTo(other);
-    public int CompareTo(CalcDecimal other) => Value.CompareTo(other.Value);
-    public int CompareTo(double other) => Value.CompareTo(other);
-  }
-
-  public class CalcDecimal : CalcValue, IComparable<CalcDecimal>, IComparable<double>, IComparable<CalcInteger>, IComparable<long> {
+  public class CalcDecimal : CalcValue, IComparable<CalcDecimal>, IComparable<decimal> {
     private const string DISPLAY_FORMAT = "0.###;-0.###";
     private const string CODE_FORMAT = "0.###############;(-0.###############)";
 
-    public double Value { get; }
+    public decimal Value { get; }
 
-    public CalcDecimal(double value) {
-      Value = value;
+    public CalcDecimal(decimal value) {
+      Value = Decimal.Round(value, 15);
     }
 
-    public static implicit operator double(CalcDecimal d) => d.Value;
-    public static implicit operator CalcDecimal(double d) => new CalcDecimal(d);
-    public static explicit operator CalcDecimal(CalcInteger i) => new CalcDecimal((double)(i.Value));
+    public static implicit operator decimal(CalcDecimal d) => d.Value;
+    public static implicit operator CalcDecimal(decimal d) => new CalcDecimal(d);
+    public static explicit operator CalcDecimal(double d) => new CalcDecimal((decimal)d);
+    public static explicit operator CalcDecimal(float d) => new CalcDecimal((decimal)d);
 
     public override string ToString(int level) => Value.ToString(DISPLAY_FORMAT);
     public override string ToCode() => Value.ToString(CODE_FORMAT);
 
     public override bool Equals(object other) {
-      if (other is CalcInteger i) return Value == i.Value;
       if (other is CalcDecimal d) return Value == d.Value;
       return false;
     }
 
     public override int GetHashCode() => Value.GetHashCode();
 
-    public int CompareTo(CalcDecimal other) => Value.CompareTo(other);
-    public int CompareTo(double other) => Value.CompareTo(other);
-    public int CompareTo(CalcInteger other) => Value.CompareTo(other);
-    public int CompareTo(long other) => Value.CompareTo(other);
+    public int CompareTo(CalcDecimal other) => Value.CompareTo(other.Value);
+    public int CompareTo(decimal other) => Value.CompareTo(Decimal.Round(other, 15));
   }
 
   public class CalcList : CalcValue, IEnumerable<CalcValue> {
@@ -125,13 +90,12 @@ namespace Nixill.CalcLib.Objects {
       return false;
     }
 
-    public double Sum() {
-      double sum = 0;
+    public decimal Sum() {
+      decimal sum = 0;
       foreach (CalcValue val in _list) {
         if (val is CalcString) throw new CalcException("Strings cannot be summed.");
         if (val is CalcList cl) sum += cl.Sum();
         else if (val is CalcDecimal cd) sum += cd.Value;
-        else if (val is CalcInteger ci) sum += (double)ci.Value;
       }
       return sum;
     }
