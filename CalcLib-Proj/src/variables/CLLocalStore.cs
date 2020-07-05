@@ -1,9 +1,8 @@
-using System.Linq;
 using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 
 namespace Nixill.CalcLib.Varaibles {
-  internal class CLLocalStore {
+  public class CLLocalStore {
     private Dictionary<string, CalcObject> Vars = new Dictionary<string, CalcObject>();
     private List<CalcObject> Params = new List<CalcObject>();
     public bool ContainsVar(string name) => Vars.ContainsKey(name);

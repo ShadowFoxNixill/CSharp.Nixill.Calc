@@ -6,8 +6,7 @@ using Nixill.CalcLib.Varaibles;
 
 namespace Nixill.CalcLib.Objects {
   public abstract class CalcValue : CalcObject {
-    internal sealed override CalcValue GetValue(CLLocalStore vars, object context = null) => this;
-    public new CalcValue GetValue(object context = null) => this;
+    public sealed override CalcValue GetValue(CLLocalStore vars, object context = null) => this;
   }
 
   public class CalcInteger : CalcValue, IComparable<CalcInteger>, IComparable<long>, IComparable<CalcDecimal>, IComparable<double> {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Nixill.CalcLib.Functions;
 using Nixill.CalcLib.Varaibles;
 using Nixill.CalcLib.Exception;
+using Nixill.CalcLib.Operators;
 
 namespace Nixill.CalcLib.Objects {
   public abstract class CalcExpression : CalcObject { }
@@ -22,8 +23,8 @@ namespace Nixill.CalcLib.Objects {
 
     public override int GetHashCode() => ToCode().GetHashCode();
 
-    internal override CalcValue GetValue(CLLocalStore vars, object context = null) =>
-      Function.FunctionDef.Invoke(Params);
+    public override CalcValue GetValue(CLLocalStore vars, object context = null) =>
+      Function.FunctionDef.Invoke(Params, context, vars);
 
     public override string ToCode() {
       string ret = "{!" + Function.Name;
@@ -64,7 +65,7 @@ namespace Nixill.CalcLib.Objects {
       }
     }
 
-    internal override CalcValue GetValue(CLLocalStore vars, object context = null) {
+    public override CalcValue GetValue(CLLocalStore vars, object context = null) {
       CalcValue[] ret = new CalcValue[_list.Length];
 
       for (int i = 0; i < _list.Length; i++) {
@@ -135,9 +136,7 @@ namespace Nixill.CalcLib.Objects {
 
     public override int GetHashCode() => ToCode().GetHashCode();
 
-    public CalcObject GetObject(object context = null) => GetObject(new CLLocalStore(), context);
-
-    internal CalcObject GetObject(CLLocalStore vars = null, object context = null) {
+    public CalcObject GetObject(CLLocalStore vars = null, object context = null) {
       if (Name.StartsWith("*") || Name.StartsWith("^")) {
         if (!(vars.ContainsVar(Name))) throw new CalcException("No variable named " + Name + " exists.");
         else return vars[Name];
@@ -160,9 +159,9 @@ namespace Nixill.CalcLib.Objects {
       throw new CalcException("No variable named " + Name + " exists.");
     }
 
-    internal override CalcValue GetValue(CLLocalStore vars, object context = null) {
+    public override CalcValue GetValue(CLLocalStore vars, object context = null) {
       CalcObject obj = GetObject(vars, context);
-      return obj.GetValue();
+      return obj.GetValue(vars);
     }
 
     public override string ToCode() {
@@ -187,7 +186,9 @@ namespace Nixill.CalcLib.Objects {
   }
 
   public class CalcOperation : CalcExpression {
-
+    public CalcObject Left { get; private set; }
+    public CalcObject Right { get; private set; }
+    public CLOperator Operator { get; private set; }
 
     public override bool Equals(object other) {
       if (!(other is CalcOperation oper)) return false;
@@ -205,7 +206,7 @@ namespace Nixill.CalcLib.Objects {
       throw new NotImplementedException();
     }
 
-    internal override CalcValue GetValue(CLLocalStore store, object context = null) {
+    public override CalcValue GetValue(CLLocalStore store, object context = null) {
       throw new NotImplementedException();
     }
   }
