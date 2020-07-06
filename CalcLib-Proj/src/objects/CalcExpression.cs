@@ -7,21 +7,61 @@ using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Operators;
 
 namespace Nixill.CalcLib.Objects {
-  public abstract class CalcExpression : CalcObject { }
-
-  public class CalcCodeFunction : CalcExpression {
-    public CLCodeFunction Function { get; private set; }
-    CalcObject[] Params;
-    public CalcObject this[int index] => Params[index];
-    public int Count => Params.Length;
-
+  /// <summary>
+  /// Base class for <c>CalcObject</c>s that are not <c>CalcValue</c>s.
+  /// </summary>
+  /// <seealso cref="CalcValue"/>
+  public abstract class CalcExpression : CalcObject {
+    /// <summary>
+    /// Determines if two <c>CalcExpression</c>s are equal by comparing
+    /// their code representations. (<c>CalcExpression</c>s are not equal
+    /// to objects that are not <c>CalcExpression</c>s.)
+    /// </summary>
+    /// <param name="obj">The object to compare to.</param>
+    /// <seealso cref="ToCode()"/>
     public sealed override bool Equals(object obj) {
-      if (!(obj is CalcCodeFunction ccf)) return false;
+      if (!(obj is CalcExpression ccf)) return false;
 
       return ToCode() == ccf.ToCode();
     }
 
-    public override int GetHashCode() => ToCode().GetHashCode();
+    /// <summary>
+    /// Returns the hash code of the <c>CalcExpression</c>.
+    /// </summary>
+    public sealed override int GetHashCode() => ToCode().GetHashCode();
+
+    /// <summary>
+    /// Evaluates this <c>CalcExpression</c> and returns the result.
+    /// </summary>
+    /// <param name="vars">A <c>CLLocalStore</c> that stores local
+    ///   variables.</param>
+    /// <param name="context">The object representing the context in which
+    ///   the expression is being evaluated.</param>
+    public abstract override CalcValue GetValue(CLLocalStore vars, object context = null);
+  }
+
+  /// <summary>
+  /// <c>CalcExpression</c>s that are hard-coded outside the scope of
+  ///   CalcLib expressions.
+  /// </summary>
+  /// <inheritdoc/>
+  public class CalcCodeFunction : CalcExpression {
+    /// <value>
+    /// The <c>CLCodeFunction</c> backing this <c>CalcCodeFunction</c>.
+    /// </value>
+    public CLCodeFunction Function { get; }
+
+    CalcObject[] Params;
+
+    /// <value>
+    /// Allows access to the parameters of a <c>CalcCodeFunction</c>.
+    /// </value>
+    public CalcObject this[int index] => Params[index];
+
+    /// <value>
+    /// How many parameters this <c>CalcCodeFunction</c> has.
+    /// </value>
+    public int Count => Params.Length;
 
     public override CalcValue GetValue(CLLocalStore vars, object context = null) =>
       Function.FunctionDef.Invoke(Params, context, vars);
@@ -50,14 +90,26 @@ namespace Nixill.CalcLib.Objects {
     }
   }
 
+  /// <summary>
+  /// A list of <c>CalcObject</c>s.
+  /// </summary>
   public class CalcListExpression : CalcExpression, IEnumerable<CalcObject> {
     private CalcObject[] _list;
+
+    /// <value>
+    /// Gets the <c>CalcObject</c> at a certain position in the
+    ///   <c>CalcList</c>.
+    /// </value>
     public CalcObject this[int index] => _list[index];
+
+    /// <value>The length of the <c>CalcList</c>.</value>
     public int Count => _list.Length;
 
     public IEnumerator<CalcObject> GetEnumerator() => ((IEnumerable<CalcObject>)_list).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_list).GetEnumerator();
 
+    /// <summary>Creates a new <c>CalcList</c>.</summary>
+    /// <param name="list">The list to copy.</param>
     public CalcListExpression(CalcObject[] list) {
       _list = new CalcObject[list.Length];
       for (int i = 0; i < list.Length; i++) {
@@ -98,45 +150,46 @@ namespace Nixill.CalcLib.Objects {
 
       return ret.Substring(0, ret.Length - 1) + "]";
     }
-
-    public override bool Equals(object other) {
-      if (!(other is CalcList list)) return false;
-      if (Count != list.Count) return false;
-
-      for (int i = 0; i < Count; i++) {
-        if (!(_list[i].Equals(list[i]))) return false;
-      }
-
-      return true;
-    }
-
-    public override int GetHashCode() {
-      int hash = 0;
-      foreach (CalcObject val in _list) {
-        hash ^= val.GetHashCode();
-      }
-      return hash;
-    }
   }
 
+  /// <summary>
+  /// A named function or variable referring to a stored
+  ///   <c>CalcObject</c>.
+  /// </summary>
   public class CalcFunction : CalcExpression {
+    /// <value>The name of the function.</value>
     public string Name { get; private set; }
-    CalcObject[] Params;
+    private CalcObject[] Params;
 
+    /// <value>
+    /// Gets the <c>CalcObject</c> at a certain position in the
+    ///   <c>CalcFunction</c>.
+    /// </value>
+    public CalcObject this[int index] => Params[index];
+
+    /// <value>The length of the <c>CalcList</c>.</value>
+    public int Count => Params.Length;
+
+    /// <summary>
+    /// Creates a new <c>CalcFunction</c>.
+    /// </summary>
+    /// <param name="name">The name of the function to call.</param>
+    /// <param name="pars">The parameters for the called function.</param>
     public CalcFunction(string name, CalcObject[] pars) {
       Name = name;
       Params = pars;
     }
 
-    public override bool Equals(object other) {
-      if (!(other is CalcFunction func)) return false;
-
-      return ToCode() == func.ToCode();
-    }
-
-    public override int GetHashCode() => ToCode().GetHashCode();
-
+    /// <summary>
+    /// Returns the object referenced by the name.
+    /// </summary>0
+    /// <param name="vars">A <c>CLLocalStore</c> that stores local
+    ///   variables.</param>
+    /// <param name="context">The object representing the context in which
+    ///   the expression is being evaluated.</param>
     public CalcObject GetObject(CLLocalStore vars = null, object context = null) {
+      vars = vars ?? new CLLocalStore();
+
       if (Name.StartsWith("*") || Name.StartsWith("^")) {
         if (!(vars.ContainsVar(Name))) throw new CalcException("No variable named " + Name + " exists.");
         else return vars[Name];
@@ -185,29 +238,45 @@ namespace Nixill.CalcLib.Objects {
     }
   }
 
+  /// <summary>
+  /// A simple operation on one or two <c>CalcValue</c>s.
+  /// </summary>
   public class CalcOperation : CalcExpression {
-    public CalcObject Left { get; private set; }
-    public CalcObject Right { get; private set; }
-    public CLOperator Operator { get; private set; }
-
-    public override bool Equals(object other) {
-      if (!(other is CalcOperation oper)) return false;
-
-      return ToCode() == oper.ToCode();
-    }
-
-    public override int GetHashCode() => ToCode().GetHashCode();
+    /// <value>
+    /// The value on the left side of the operator. Is null if the
+    ///   <c>Operator</c> is a <c>CLPrefixOperator</c>.
+    /// </value>
+    public CalcObject Left { get; }
+    /// <value>
+    /// The value on the right side of the operator. Is null if the
+    ///   <c>Operator</c> is a <c>CLPostfixOperator</c>.
+    /// </value>
+    public CalcObject Right { get; }
+    /// <value>
+    /// The operator itself.
+    /// </value>
+    public CLOperator Operator { get; }
 
     public override string ToCode() {
-      throw new NotImplementedException();
+      string left = Left?.ToCode() ?? "";
+      string right = Right?.ToCode() ?? "";
+      return "(" + left + Operator.Symbol + right + ")";
     }
 
     public override string ToString(int level) {
-      throw new NotImplementedException();
+      if (level == 0) return "(...)";
+
+      string left = Left?.ToString(level - 1) ?? "";
+      string right = Right?.ToString(level - 1) ?? "";
+
+      return "(" + left + Operator.Symbol + right + ")";
     }
 
-    public override CalcValue GetValue(CLLocalStore store, object context = null) {
-      throw new NotImplementedException();
+    public override CalcValue GetValue(CLLocalStore vars, object context = null) {
+      if (Operator is CLBinaryOperator bin) return bin.Run(Left, Right, vars, context);
+      else if (Operator is CLPrefixOperator pre) return pre.Run(Right, vars, context);
+      else if (Operator is CLPostfixOperator post) return post.Run(Left, vars, context);
+      else throw new InvalidCastException("Operators must be binary, prefix, or postfix.");
     }
   }
 }

@@ -5,39 +5,55 @@ using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Varaibles;
 
 namespace Nixill.CalcLib.Objects {
+  /// <summary>
+  /// Represents a resolved value.
+  /// </summary>
   public abstract class CalcValue : CalcObject {
     public sealed override CalcValue GetValue(CLLocalStore vars, object context = null) => this;
   }
 
-  public class CalcDecimal : CalcValue, IComparable<CalcDecimal>, IComparable<decimal> {
+  /// <summary>
+  /// Represents a number.
+  /// </summary>
+  public class CalcNumber : CalcValue, IComparable<CalcNumber>, IComparable<decimal> {
     private const string DISPLAY_FORMAT = "0.###;-0.###";
     private const string CODE_FORMAT = "0.###############;(-0.###############)";
 
+    /// <value>The value of the contained number.</value>
     public decimal Value { get; }
 
-    public CalcDecimal(decimal value) {
+    /// <summary>Creates a new <c>CalcNumber</c>.</summary>
+    public CalcNumber(decimal value) {
       Value = Decimal.Round(value, 15);
     }
 
-    public static implicit operator decimal(CalcDecimal d) => d.Value;
-    public static implicit operator CalcDecimal(decimal d) => new CalcDecimal(d);
-    public static explicit operator CalcDecimal(double d) => new CalcDecimal((decimal)d);
-    public static explicit operator CalcDecimal(float d) => new CalcDecimal((decimal)d);
+    public static implicit operator decimal(CalcNumber d) => d.Value;
+    public static implicit operator CalcNumber(decimal d) => new CalcNumber(d);
+    public static explicit operator CalcNumber(double d) => new CalcNumber((decimal)d);
+    public static explicit operator CalcNumber(float d) => new CalcNumber((decimal)d);
 
     public override string ToString(int level) => Value.ToString(DISPLAY_FORMAT);
     public override string ToCode() => Value.ToString(CODE_FORMAT);
 
     public override bool Equals(object other) {
-      if (other is CalcDecimal d) return Value == d.Value;
+      if (other is CalcNumber d) return Value == d.Value;
       return false;
     }
 
     public override int GetHashCode() => Value.GetHashCode();
 
-    public int CompareTo(CalcDecimal other) => Value.CompareTo(other.Value);
+    public int CompareTo(CalcNumber other) => Value.CompareTo(other.Value);
     public int CompareTo(decimal other) => Value.CompareTo(Decimal.Round(other, 15));
   }
 
+  /// <summary>
+  /// Represents a list of values.
+  /// </summary>
+  /// <remarks>
+  /// <para>This class is differentiated from <c>CalcListExpression</c> by
+  ///   the fact that this can only hold resolved values.</para>
+  /// </remarks>
+  /// <seealso cref="CalcListExpression"/>
   public class CalcList : CalcValue, IEnumerable<CalcValue> {
     private CalcValue[] _list;
     public CalcValue this[int index] => _list[index];
@@ -95,7 +111,7 @@ namespace Nixill.CalcLib.Objects {
       foreach (CalcValue val in _list) {
         if (val is CalcString) throw new CalcException("Strings cannot be summed.");
         if (val is CalcList cl) sum += cl.Sum();
-        else if (val is CalcDecimal cd) sum += cd.Value;
+        else if (val is CalcNumber cd) sum += cd.Value;
       }
       return sum;
     }

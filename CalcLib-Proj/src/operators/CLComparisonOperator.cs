@@ -3,33 +3,33 @@ using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Varaibles;
 
 namespace Nixill.CalcLib.Operators {
-  public class CLComparisonOperatorSet<R> where R : CalcValue {
-    public Func<CalcObject, CLComparison, CalcObject, object, CLLocalStore, R> CompFunction { get; }
+  public class CLComparisonOperatorSet {
+    public Func<CalcObject, CLComparison, CalcObject, CLLocalStore, object, CalcValue> CompFunction { get; }
     public string PrefixSymbol { get; }
     public int Priority { get; }
 
-    public CLComparisonOperator<R> Greater { get; }
-    public CLComparisonOperator<R> Equal { get; }
-    public CLComparisonOperator<R> Less { get; }
-    public CLComparisonOperator<R> NotGreater { get; }
-    public CLComparisonOperator<R> NotEqual { get; }
-    public CLComparisonOperator<R> NotLess { get; }
-    public CLComparisonOperator<R> Modulo { get; }
-    public CLComparisonOperator<R> NotModulo { get; }
+    public CLComparisonOperator Greater { get; }
+    public CLComparisonOperator Equal { get; }
+    public CLComparisonOperator Less { get; }
+    public CLComparisonOperator NotGreater { get; }
+    public CLComparisonOperator NotEqual { get; }
+    public CLComparisonOperator NotLess { get; }
+    public CLComparisonOperator Modulo { get; }
+    public CLComparisonOperator NotModulo { get; }
 
-    public CLComparisonOperatorSet(string prefix, int priority, Func<CalcObject, CLComparison, CalcObject, object, CLLocalStore, R> compFunction) {
+    public CLComparisonOperatorSet(string prefix, int priority, Func<CalcObject, CLComparison, CalcObject, CLLocalStore, object, CalcValue> compFunction) {
       PrefixSymbol = prefix;
       Priority = priority;
       CompFunction = compFunction;
 
-      Greater = new CLComparisonOperator<R>(this, CLComparison.Greater);
-      Equal = new CLComparisonOperator<R>(this, CLComparison.Equal);
-      Less = new CLComparisonOperator<R>(this, CLComparison.Less);
-      NotGreater = new CLComparisonOperator<R>(this, CLComparison.NotGreater);
-      NotEqual = new CLComparisonOperator<R>(this, CLComparison.NotEqual);
-      NotLess = new CLComparisonOperator<R>(this, CLComparison.NotLess);
-      Modulo = new CLComparisonOperator<R>(this, CLComparison.Modulo);
-      NotModulo = new CLComparisonOperator<R>(this, CLComparison.NotModulo);
+      Greater = new CLComparisonOperator(this, CLComparison.Greater);
+      Equal = new CLComparisonOperator(this, CLComparison.Equal);
+      Less = new CLComparisonOperator(this, CLComparison.Less);
+      NotGreater = new CLComparisonOperator(this, CLComparison.NotGreater);
+      NotEqual = new CLComparisonOperator(this, CLComparison.NotEqual);
+      NotLess = new CLComparisonOperator(this, CLComparison.NotLess);
+      Modulo = new CLComparisonOperator(this, CLComparison.Modulo);
+      NotModulo = new CLComparisonOperator(this, CLComparison.NotModulo);
     }
   }
 
@@ -52,8 +52,8 @@ namespace Nixill.CalcLib.Operators {
     public static readonly CLComparison NotModulo = new CLComparison("!%", (left, right) => left % right != 0);
   }
 
-  public class CLComparisonOperator<R> : CLBinaryOperator<R> where R : CalcValue {
-    internal CLComparisonOperator(CLComparisonOperatorSet<R> set, CLComparison comp) :
-      base(set.PrefixSymbol + comp.PostfixSymbol, set.Priority, (left, right, context, vars) => set.CompFunction(left, comp, right, context, vars)) { }
+  public class CLComparisonOperator : CLBinaryOperator {
+    internal CLComparisonOperator(CLComparisonOperatorSet set, CLComparison comp) :
+      base(set.PrefixSymbol + comp.PostfixSymbol, set.Priority, (left, right, vars, context) => set.CompFunction(left, comp, right, vars, context)) { }
   }
 }

@@ -4,13 +4,32 @@ using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Varaibles;
 
 namespace Nixill.CalcLib.Functions {
+  /// <summary>
+  /// Defines the code of a <link cref="CalcCodeFunction">CalcCodeFunction</link>.
+  /// </summary>
   public class CLCodeFunction {
+    /// <value>
+    /// The function that runs whenever the code function is called.
+    /// </value>
     public Func<CalcObject[], object, CLLocalStore, CalcValue> FunctionDef { get; private set; }
+    /// <value>The name of the code function.</value>
     public string Name { get; private set; }
 
-    Dictionary<string, CLCodeFunction> AllFunctions = new Dictionary<string, CLCodeFunction>();
-    public CLCodeFunction this[string index] => AllFunctions[index];
+    static Dictionary<string, CLCodeFunction> AllFunctions = new Dictionary<string, CLCodeFunction>();
 
+    /// <summary>
+    /// Gets a <c>CLCodeFunction</c> by its name.
+    /// </summary>
+    public static CLCodeFunction Get(string name) => AllFunctions[name];
+
+    /// <summary>Creates a new <c>CLCodeFunction</c>.</summary>
+    /// <param name="name">The name to give the function.</param>
+    /// <param name="funcDef">The code of the function.</param>
+    /// <remarks>
+    /// <para>Any existing functions with the same name are replaced, but
+    ///   existing
+    ///   <link cref="CalcCodeFunction"><c>CalcCodeFunction</c></link>s
+    ///   will continue to reference the old <c>CLCodeFunction</c>.</para>
     public CLCodeFunction(string name, Func<CalcObject[], object, CLLocalStore, CalcValue> funcDef) {
       Name = name;
       FunctionDef = funcDef;

@@ -1,0 +1,18 @@
+<docs>
+  <CalcException>
+    <Class>
+      <summary>An exception thrown when a calculation errors.</summary>
+    </Class>
+    <Constructor:String>
+      <summary>Creates a <c>CalcExcecption</c> with a message.</summary>
+      <param name="message">The message to display.</param>
+    </Constructor:String>
+    <Constructor:SystemException-String>
+      <summary>Creates a <c>CalcExcecption</c> with a base exception and a
+        message.</summary>
+      <param name="based">The exception that caused this
+        <c>CalcException</c>.</param>
+      <param name="message">The message to display.</param>
+    </Constructor:SystemException-String>
+  </CalcException>
+</docs>

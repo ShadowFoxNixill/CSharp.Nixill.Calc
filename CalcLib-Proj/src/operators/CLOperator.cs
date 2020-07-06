@@ -25,41 +25,41 @@ namespace Nixill.CalcLib.Operators {
     public abstract override string ToString();
   }
 
-  public class CLBinaryOperator<R> : CLOperator where R : CalcValue {
-    public Func<CalcObject, CalcObject, object, CLLocalStore, R> Function { get; }
+  public class CLBinaryOperator : CLOperator {
+    public Func<CalcObject, CalcObject, CLLocalStore, object, CalcValue> Function { get; }
 
-    public CLBinaryOperator(string symbol, int priority, Func<CalcObject, CalcObject, object, CLLocalStore, R> function) {
+    public CLBinaryOperator(string symbol, int priority, Func<CalcObject, CalcObject, CLLocalStore, object, CalcValue> function) {
       Symbol = symbol;
       Priority = priority;
       Function = function;
     }
 
-    public R Run(CalcObject left, CalcObject right, object context = null, CLLocalStore vars = null) => Function.Invoke(left, right, context, vars);
+    public CalcValue Run(CalcObject left, CalcObject right, CLLocalStore vars = null, object context = null) => Function.Invoke(left, right, vars, context);
 
     public override string ToString() => "bin:" + Symbol;
   }
 
-  public abstract class CLUnaryOperator<R> : CLOperator where R : CalcValue {
-    public Func<CalcObject, object, CLLocalStore, R> Function { get; }
+  public abstract class CLUnaryOperator : CLOperator {
+    public Func<CalcObject, CLLocalStore, object, CalcValue> Function { get; }
     public bool IsPrefix { get; }
 
-    internal CLUnaryOperator(string symbol, int priority, bool isPrefix, Func<CalcObject, object, CLLocalStore, R> function) {
+    internal CLUnaryOperator(string symbol, int priority, bool isPrefix, Func<CalcObject, CLLocalStore, object, CalcValue> function) {
       Symbol = symbol;
       Priority = priority;
       Function = function;
       IsPrefix = isPrefix;
     }
 
-    public R Run(CalcObject operand, object context = null, CLLocalStore vars = null) => Function.Invoke(operand, context, vars);
+    public CalcValue Run(CalcObject operand, CLLocalStore vars = null, object context = null) => Function.Invoke(operand, vars, context);
 
     public override string ToString() => (IsPrefix ? "pre:" : "post:") + Symbol;
   }
 
-  public class CLPrefixOperator<R> : CLUnaryOperator<R> where R : CalcValue {
-    public CLPrefixOperator(string symbol, int priority, Func<CalcObject, object, CLLocalStore, R> function) : base(symbol, priority, true, function) { }
+  public class CLPrefixOperator : CLUnaryOperator {
+    public CLPrefixOperator(string symbol, int priority, Func<CalcObject, CLLocalStore, object, CalcValue> function) : base(symbol, priority, true, function) { }
   }
 
-  public class CLPostfixOperator<R> : CLUnaryOperator<R> where R : CalcValue {
-    public CLPostfixOperator(string symbol, int priority, Func<CalcObject, object, CLLocalStore, R> function) : base(symbol, priority, true, function) { }
+  public class CLPostfixOperator : CLUnaryOperator {
+    public CLPostfixOperator(string symbol, int priority, Func<CalcObject, CLLocalStore, object, CalcValue> function) : base(symbol, priority, true, function) { }
   }
 }
