@@ -46,21 +46,21 @@ namespace Nixill.CalcLib.Objects {
   /// </summary>
   /// <inheritdoc/>
   public class CalcCodeFunction : CalcExpression {
-    /// <value>
+    /// <summary>
     /// The <c>CLCodeFunction</c> backing this <c>CalcCodeFunction</c>.
-    /// </value>
+    /// </summary>
     public CLCodeFunction Function { get; }
 
     CalcObject[] Params;
 
-    /// <value>
+    /// <summary>
     /// Allows access to the parameters of a <c>CalcCodeFunction</c>.
-    /// </value>
+    /// </summary>
     public CalcObject this[int index] => Params[index];
 
-    /// <value>
+    /// <summary>
     /// How many parameters this <c>CalcCodeFunction</c> has.
-    /// </value>
+    /// </summary>
     public int Count => Params.Length;
 
     public override CalcValue GetValue(CLLocalStore vars, object context = null) =>
@@ -96,13 +96,13 @@ namespace Nixill.CalcLib.Objects {
   public class CalcListExpression : CalcExpression, IEnumerable<CalcObject> {
     private CalcObject[] _list;
 
-    /// <value>
+    /// <summary>
     /// Gets the <c>CalcObject</c> at a certain position in the
     ///   <c>CalcList</c>.
-    /// </value>
+    /// </summary>
     public CalcObject this[int index] => _list[index];
 
-    /// <value>The length of the <c>CalcList</c>.</value>
+    /// <summary>The length of the <c>CalcList</c>.</summary>
     public int Count => _list.Length;
 
     public IEnumerator<CalcObject> GetEnumerator() => ((IEnumerable<CalcObject>)_list).GetEnumerator();
@@ -157,17 +157,17 @@ namespace Nixill.CalcLib.Objects {
   ///   <c>CalcObject</c>.
   /// </summary>
   public class CalcFunction : CalcExpression {
-    /// <value>The name of the function.</value>
+    /// <summary>The name of the function.</summary>
     public string Name { get; private set; }
     private CalcObject[] Params;
 
-    /// <value>
+    /// <summary>
     /// Gets the <c>CalcObject</c> at a certain position in the
     ///   <c>CalcFunction</c>.
-    /// </value>
+    /// </summary>
     public CalcObject this[int index] => Params[index];
 
-    /// <value>The length of the <c>CalcList</c>.</value>
+    /// <summary>The length of the <c>CalcList</c>.</summary>
     public int Count => Params.Length;
 
     /// <summary>
@@ -242,19 +242,19 @@ namespace Nixill.CalcLib.Objects {
   /// A simple operation on one or two <c>CalcValue</c>s.
   /// </summary>
   public class CalcOperation : CalcExpression {
-    /// <value>
+    /// <summary>
     /// The value on the left side of the operator. Is null if the
     ///   <c>Operator</c> is a <c>CLPrefixOperator</c>.
-    /// </value>
+    /// </summary>
     public CalcObject Left { get; }
-    /// <value>
+    /// <summary>
     /// The value on the right side of the operator. Is null if the
     ///   <c>Operator</c> is a <c>CLPostfixOperator</c>.
-    /// </value>
+    /// </summary>
     public CalcObject Right { get; }
-    /// <value>
+    /// <summary>
     /// The operator itself.
-    /// </value>
+    /// </summary>
     public CLOperator Operator { get; }
 
     public override string ToCode() {

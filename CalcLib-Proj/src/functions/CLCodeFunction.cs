@@ -8,11 +8,11 @@ namespace Nixill.CalcLib.Functions {
   /// Defines the code of a <link cref="CalcCodeFunction">CalcCodeFunction</link>.
   /// </summary>
   public class CLCodeFunction {
-    /// <value>
+    /// <summary>
     /// The function that runs whenever the code function is called.
-    /// </value>
+    /// </summary>
     public Func<CalcObject[], object, CLLocalStore, CalcValue> FunctionDef { get; private set; }
-    /// <value>The name of the code function.</value>
+    /// <summary>The name of the code function.</summary>
     public string Name { get; private set; }
 
     static Dictionary<string, CLCodeFunction> AllFunctions = new Dictionary<string, CLCodeFunction>();

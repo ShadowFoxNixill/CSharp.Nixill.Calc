@@ -19,7 +19,7 @@ namespace Nixill.CalcLib.Objects {
     private const string DISPLAY_FORMAT = "0.###;-0.###";
     private const string CODE_FORMAT = "0.###############;(-0.###############)";
 
-    /// <value>The value of the contained number.</value>
+    /// <summary>The value of the contained number.</summary>
     public decimal Value { get; }
 
     /// <summary>Creates a new <c>CalcNumber</c>.</summary>
@@ -56,12 +56,23 @@ namespace Nixill.CalcLib.Objects {
   /// <seealso cref="CalcListExpression"/>
   public class CalcList : CalcValue, IEnumerable<CalcValue> {
     private CalcValue[] _list;
+
+    /// <summary>Retrieves a specific item from the <c>CalcList</c>.</summary>
     public CalcValue this[int index] => _list[index];
+
+    /// <summary>Returns the size of the <c>CalcList</c>.</summary>
     public int Count => _list.Length;
 
+    /// <summary>
+    /// Returns an enumerator through the items of the list.
+    /// </summary>
     public IEnumerator<CalcValue> GetEnumerator() => ((IEnumerable<CalcValue>)_list).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_list).GetEnumerator();
 
+    /// <summary>
+    /// Creates a new <c>CalcList</c>.
+    /// </summary>
+    /// <param name="list">The values going into the list.</param>
     public CalcList(CalcValue[] list) {
       _list = new CalcValue[list.Length];
       for (int i = 0; i < list.Length; i++) {
@@ -96,6 +107,10 @@ namespace Nixill.CalcLib.Objects {
       return ret.Substring(0, ret.Length - 1) + "]";
     }
 
+    /// <summary>
+    /// Returns whether there are any <c>CalcString</c>s in this
+    ///   <c>CalcList</c> or any child <c>CalcList</c>s.
+    /// </summary>
     public bool HasString() {
       foreach (CalcValue val in _list) {
         if (val is CalcString) return true;
@@ -106,6 +121,14 @@ namespace Nixill.CalcLib.Objects {
       return false;
     }
 
+    /// <summary>
+    /// Returns the sum of all the entries in the <c>CalcList</c>.
+    /// <summary>
+    /// <remarks>
+    /// <para>If there are any <c>CalcString</c>s within this or child
+    ///   <c>CalcList</c>s, this operation will throw a
+    ///   <c>CalcException</c>.</para>
+    /// </remarks>
     public decimal Sum() {
       decimal sum = 0;
       foreach (CalcValue val in _list) {
@@ -136,7 +159,11 @@ namespace Nixill.CalcLib.Objects {
     }
   }
 
+  /// <summary>
+  /// Represents a string of text.
+  /// </summary>
   public class CalcString : CalcValue, IComparable<CalcString>, IComparable<String> {
+    /// <summary>The contained string.</summary>
     public string Value { get; }
 
     public CalcString(string value) {
