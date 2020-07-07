@@ -32,6 +32,8 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="level">The level to check.</param>
     public static bool IsFromRight(int level) => FromRightOperators.Contains(level);
 
+
+
     internal CLOperator() { }
 
     /// <summary>The priority of a given <c>CLOperator</c>.</summary>
