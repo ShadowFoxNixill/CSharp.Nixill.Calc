@@ -14,7 +14,9 @@ namespace Nixill.CalcLib.Parsing {
   }
 
   /// <summary>
+  /// Lexes the input (splitting it into separate pieces)
+  /// </summary>
   public class CLLexer {
-
+    
   }
 }
