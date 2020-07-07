@@ -45,6 +45,15 @@ namespace Nixill.CalcLib.Objects {
     public abstract string ToString(int level);
 
     /// <summary>
+    /// Returns a detailed tree of this <c>CalcObject</c> and all its
+    ///   children.
+    /// </summary>
+    /// <param name="level">
+    /// The level at which to print this object.
+    /// </param>
+    public abstract string ToTree(int level);
+
+    /// <summary>
     /// Returns whether two <c>CalcObject</c>s are equal.
     /// </summary>
     /// <param name="left">The left <c>CalcObject</c>.</param>

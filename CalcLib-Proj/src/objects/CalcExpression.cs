@@ -88,6 +88,18 @@ namespace Nixill.CalcLib.Objects {
 
       return ret + "}";
     }
+
+    public override string ToTree(int level) {
+      string ret = new string(' ', level * 2) + "CodeFunction: " + Function.Name;
+
+      if (Params.Length == 0) return ret + " (no params)";
+
+      foreach (CalcObject obj in Params) {
+        ret += "\n" + obj.ToTree(level + 1);
+      }
+
+      return ret;
+    }
   }
 
   /// <summary>
@@ -149,6 +161,18 @@ namespace Nixill.CalcLib.Objects {
       }
 
       return ret.Substring(0, ret.Length - 1) + "]";
+    }
+
+    public override string ToTree(int level) {
+      string ret = new string(' ', level * 2) + "ListExpression:";
+
+      if (_list.Length == 0) return ret + " (empty)";
+
+      foreach (CalcObject obj in _list) {
+        ret += "\n" + obj.ToTree(level + 1);
+      }
+
+      return ret;
     }
   }
 
@@ -236,6 +260,18 @@ namespace Nixill.CalcLib.Objects {
 
       return ret + "}";
     }
+
+    public override string ToTree(int level) {
+      string ret = new string(' ', level * 2) + "CodeFunction: " + Name;
+
+      if (Params.Length == 0) return ret + " (no params)";
+
+      foreach (CalcObject obj in Params) {
+        ret += "\n" + obj.ToTree(level + 1);
+      }
+
+      return ret;
+    }
   }
 
   /// <summary>
@@ -277,6 +313,15 @@ namespace Nixill.CalcLib.Objects {
       else if (Operator is CLPrefixOperator pre) return pre.Run(Right, vars, context);
       else if (Operator is CLPostfixOperator post) return post.Run(Left, vars, context);
       else throw new InvalidCastException("Operators must be binary, prefix, or postfix.");
+    }
+
+    public override string ToTree(int level) {
+      string ret = new String(' ', level * 2) + "Operation: " + Operator.ToString();
+
+      if (Left != null) ret += "\n" + Left.ToTree(level + 1);
+      if (Right != null) ret += "\n" + Right.ToTree(level + 1);
+
+      return ret;
     }
   }
 }

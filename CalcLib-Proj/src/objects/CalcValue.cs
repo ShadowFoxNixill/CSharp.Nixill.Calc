@@ -44,6 +44,10 @@ namespace Nixill.CalcLib.Objects {
 
     public int CompareTo(CalcNumber other) => Value.CompareTo(other.Value);
     public int CompareTo(decimal other) => Value.CompareTo(Decimal.Round(other, 15));
+
+    public override string ToTree(int level) {
+      return new String(' ', level * 2) + "Number: " + Value.ToString(CODE_FORMAT);
+    }
   }
 
   /// <summary>
@@ -157,6 +161,17 @@ namespace Nixill.CalcLib.Objects {
       }
       return hash;
     }
+
+    public override string ToTree(int level) {
+      string ret = new string(' ', level * 2) + "List:";
+      if (_list.Length == 0) return ret + " (empty)";
+
+      foreach (CalcValue val in _list) {
+        ret += "\n" + val.ToTree(level + 1);
+      }
+
+      return ret;
+    }
   }
 
   /// <summary>
@@ -187,6 +202,10 @@ namespace Nixill.CalcLib.Objects {
     }
 
     public override int GetHashCode() => Value.GetHashCode();
+
+    public override string ToTree(int level) {
+      return new String(' ', level * 2) + "String: " + ToCode();
+    }
 
     public int CompareTo(string other) => Value.CompareTo(other);
     public int CompareTo(CalcString other) => Value.CompareTo(other);
