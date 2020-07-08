@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Operators;
+using Nixill.Utils;
 
 namespace Nixill.CalcLib.Parsing {
   /// <summary>
@@ -41,39 +42,39 @@ namespace Nixill.CalcLib.Parsing {
         Match match = null;
 
         // See if it's whitespace before any tokens.
-        if (RegexMatches(rgxWhitespace, input, out match)) {
+        if (CLUtils.RegexMatches(rgxWhitespace, input, out match)) {
           move = match.Length;
         }
 
         // Is it a number?
-        else if (RegexMatches(rgxNumber, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxNumber, input, out match)) {
           last = match.Value;
           ret.Add(new CLObjectPiece(last, CLObjectPieceType.Number, pos));
           move = match.Length;
         }
 
         // Is it a separator?
-        else if (RegexMatches(rgxSeparator, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxSeparator, input, out match)) {
           last = match.Value;
           ret.Add(new CLObjectPiece(last, CLObjectPieceType.Number, pos));
           move = match.Length;
         }
 
         // Is it a comment?
-        else if (RegexMatches(rgxComment, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxComment, input, out match)) {
           move = match.Length;
           // comments aren't included in the syntax tree
         }
 
         // Is it a name?
-        else if (RegexMatches(rgxName, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxName, input, out match)) {
           last = match.Value;
           ret.Add(new CLObjectPiece(last, CLObjectPieceType.FunctionName, pos));
           move = match.Length;
         }
 
         // ... Is it an operator, or group thereof?
-        else if (RegexMatches(rgxOperator, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxOperator, input, out match)) {
           string opers = rgxWhitespaceReplace.Replace(match.Value, "");
           move = match.Length;
 
@@ -101,11 +102,8 @@ namespace Nixill.CalcLib.Parsing {
         // No match? That's a paddlin.
         else throw new CLSyntaxException("I don't know what this means.", pos);
       }
-    }
 
-    private static bool RegexMatches(Regex pattern, string test, out Match match) {
-      match = pattern.Match(test);
-      return match.Success;
+      return ret;
     }
   }
 }

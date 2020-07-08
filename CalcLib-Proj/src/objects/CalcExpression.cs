@@ -293,6 +293,12 @@ namespace Nixill.CalcLib.Objects {
     /// </summary>
     public CLOperator Operator { get; }
 
+    public CalcOperation(CalcObject left, CLOperator oper, CalcObject right) {
+      Left = left;
+      Operator = oper;
+      Right = right;
+    }
+
     public override string ToCode() {
       string left = Left?.ToCode() ?? "";
       string right = Right?.ToCode() ?? "";
