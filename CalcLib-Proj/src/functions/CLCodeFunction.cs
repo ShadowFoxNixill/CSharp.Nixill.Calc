@@ -22,6 +22,12 @@ namespace Nixill.CalcLib.Functions {
     /// </summary>
     public static CLCodeFunction Get(string name) => AllFunctions[name];
 
+    /// <summary>
+    /// Returns whether a <c>CLCodeFunction</c> exists with the given
+    ///   name.
+    /// </summary>
+    public static bool Exists(string name) => AllFunctions.ContainsKey(name);
+
     /// <summary>Creates a new <c>CLCodeFunction</c>.</summary>
     /// <param name="name">The name to give the function.</param>
     /// <param name="funcDef">The code of the function.</param>

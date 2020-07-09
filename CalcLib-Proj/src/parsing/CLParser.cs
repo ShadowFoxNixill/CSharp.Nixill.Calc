@@ -27,7 +27,7 @@ namespace Nixill.CalcLib.Parsing {
     }
 
     // Parses a single "operation chain"
-    public static CalcObject ParseChain(List<CLObjectPiece> pieces) {
+    private static CalcObject ParseChain(List<CLObjectPiece> pieces) {
       // First, we can't parse an empty list.
       if (pieces.Count == 0)
         throw new CLSyntaxException("Empty list received.", 0);
@@ -97,7 +97,7 @@ namespace Nixill.CalcLib.Parsing {
           else {
             // Put it on the most recent expression
             CLExpressionBuilder exp = exps.Last.Value;
-            exp.RightObj = obj;
+            exp.Right = obj;
           }
 
           continue;
@@ -117,7 +117,7 @@ namespace Nixill.CalcLib.Parsing {
         // If it's the first operator...
         if (exps.Count == 0) {
           // ... use the held value if one exists
-          if (hold != null) expNew.LeftObj = hold;
+          if (hold != null) expNew.Left = hold;
           exps.AddLast(expNew);
         }
         // Otherwise...
@@ -125,7 +125,7 @@ namespace Nixill.CalcLib.Parsing {
           // For prefix operators we don't need to check priorities to the
           // left. They can just stack on in.
           if (op is CLPrefixOperator) {
-            exps.Last.Value.RightExp = expNew;
+            exps.Last.Value.Right = expNew;
             exps.AddLast(expNew);
           }
           else {
@@ -146,23 +146,211 @@ namespace Nixill.CalcLib.Parsing {
                 // but evaluated left-to-right
                 (expNext.Operator.Priority == op.Priority &&
                   !CLOperator.IsFromRight(op.Priority))
-              ) // see line 281 https://github.com/ShadowFoxNixill/DiceCalculator/blob/master/src/main/java/net/nixill/dice/parsing/ExpressionParser.java#L281
+              ) {
+                expOld = exps.Last.Value;
+                exps.RemoveLast();
+                expNext = null;
+              }
+              else {
+                break;
+              }
             }
+
+            // The last removed expression becomes the left of this one.
+            // (If there's no such expression, then the right of the next
+            // expression on the stack becomes our left.)
+            if (expOld != null) {
+              expNew.Left = expOld;
+            }
+            else {
+              expNew.Left = expNext.Right;
+            }
+
+            // Then, this expression becomes the right of the next one.
+            if (expNext != null) {
+              expNext.Right = expNew;
+            }
+
+            exps.AddLast(expNew);
           }
         }
+
+        pieces.RemoveAt(0);
       }
+
+      if (exps.Count == 0) return hold;
+      else return exps.First.Value.Build();
+    }
+
+    // Parses a parenthesized expression.
+    private static CalcObject ParseParentheses(List<CLObjectPiece> pieces) {
+      // First, get the "(" that spawned this method.
+      CLObjectPiece lpar = pieces[0];
+      pieces.RemoveAt(0);
+
+      CalcObject ret = ParseChain(pieces);
+
+      // If we now have an empty expression, we never closed the "(".
+      if (pieces.Count == 0) throw new CLSyntaxException("Unmatched (", lpar.Position);
+      else {
+        // Otherwise, we should have a ")" next.
+        CLObjectPiece rpar = pieces[0];
+        pieces.RemoveAt(0);
+        if (rpar.Contents != ")")
+          // Maybe it's a "]", "}", or "," though.
+          throw new CLSyntaxException("Unmatched ( and " + rpar.Contents, lpar.Position);
+      }
+
+      // But if we've made it here, we're fine.
+      return ret;
+    }
+
+    // Parses a list.
+    private static CalcListExpression ParseList(List<CLObjectPiece> pieces) {
+      // First, get the "[" that spawned this method.
+      CLObjectPiece lbracket = pieces[0];
+      pieces.RemoveAt(0);
+
+      List<CalcObject> ret = new List<CalcObject>();
+
+      // Also, we'll allow empty lists.
+      CLObjectPiece next = pieces[0];
+      if (next.Contents == "]") {
+        pieces.RemoveAt(0);
+        return new CalcListExpression(ret.ToArray());
+      }
+
+      // But anyway, let's start populating non-empty lists.
+      while (pieces.Count != 0) {
+        // Get the value
+        CalcObject obj = ParseChain(pieces);
+
+        // But no empty values are allowed
+        if (obj == null) throw new CLSyntaxException("Value expected in list", pieces[0].Position);
+
+        // Add it to the list
+        ret.Add(obj);
+
+        // Now get the next bracket
+        next = pieces[0];
+        pieces.RemoveAt(0);
+
+        // If it's a ")" or "}", error.
+        if (next.Contents == ")" || next.Contents == "}")
+          throw new CLSyntaxException("Unclosed [ and " + next.Contents, lbracket.Position);
+
+        // If it's a "]", we're done.
+        if (next.Contents == "]")
+          return new CalcListExpression(ret.ToArray());
+
+        // Otherwise, keep looping.
+      }
+
+      // Oh, if we're out of pieces...
+      throw new CLSyntaxException("Unclosed [", lbracket.Position);
+    }
+
+    // And this method parses Functions, including Code Functions.
+    private static CalcFunction ParseFunction(List<CLObjectPiece> pieces) {
+      // As with the other two methods, we'll get and store the opener.
+      CLObjectPiece lbrace = pieces[0];
+      pieces.RemoveAt(0);
+
+      string name = lbrace.Contents.Substring(1);
+      List<CalcObject> pars = new List<CalcObject>();
+
+      // And again, no-param functions are allowed.
+      CLObjectPiece next = pieces[0];
+      if (next.Contents == "}") {
+        pieces.RemoveAt(0);
+        return new CalcFunction(name, pars.ToArray());
+      }
+
+      // If the next piece is a comma, let's just get rid of it.
+      if (next.Contents == ",") pieces.RemoveAt(0);
+
+      // And parse through the params.
+      while (pieces.Count != 0) {
+        // Get the value
+        CalcObject obj = ParseChain(pieces);
+
+        // But no empty values are allowed
+        if (obj == null) throw new CLSyntaxException("Value expected in function", pieces[0].Position);
+
+        // Add it to the params
+        pars.Add(obj);
+
+        // Now get the next bracket
+        next = pieces[0];
+        pieces.RemoveAt(0);
+
+        // If it's a ")" or "]", error.
+        if (next.Contents == ")" || next.Contents == "]")
+          throw new CLSyntaxException("Unclosed { and " + next.Contents, lbrace.Position);
+
+        // If it's a "}", we're done.
+        if (next.Contents == "}")
+          return new CalcFunction(name, pars.ToArray());
+
+        // Otherwise, keep looping.
+      }
+
+      // Oh, if we're out of pieces...
+      throw new CLSyntaxException("Unclosed {", lbrace.Position);
     }
   }
 
-  /// <summary>
-  /// A mutable opbject with which to build a <c>CalcObject</c>.
-  /// </summary>
+  // A mutable object with which to build a CalcObject.
   internal class CLExpressionBuilder {
-    public CalcObject LeftObj;
-    public CalcObject RightObj;
     public CLOperator Operator;
-    public CLExpressionBuilder LeftExp;
-    public CLExpressionBuilder RightExp;
+    public CalcObject LeftObj { get; private set; }
+    public CalcObject RightObj { get; private set; }
+    public CLExpressionBuilder LeftExp { get; private set; }
+    public CLExpressionBuilder RightExp { get; private set; }
+
+    public object Left {
+      get {
+        if (LeftObj != null) return LeftObj;
+        else return LeftExp;
+      }
+      set {
+        if (value == null) {
+          LeftObj = null;
+          LeftExp = null;
+        }
+        else if (value is CalcObject obj) {
+          LeftObj = obj;
+          LeftExp = null;
+        }
+        else if (value is CLExpressionBuilder exp) {
+          LeftExp = exp;
+          LeftObj = null;
+        }
+        else throw new InvalidCastException("CLExpressionBuilder.Left only takes a CalcObject or CLExpressionBuilder");
+      }
+    }
+
+    public object Right {
+      get {
+        if (RightObj != null) return RightObj;
+        else return RightExp;
+      }
+      set {
+        if (value == null) {
+          RightObj = null;
+          RightExp = null;
+        }
+        else if (value is CalcObject obj) {
+          RightObj = obj;
+          RightExp = null;
+        }
+        else if (value is CLExpressionBuilder exp) {
+          RightExp = exp;
+          RightObj = null;
+        }
+        else throw new InvalidCastException("CLExpressionBuilder.Right only takes a CalcObject or CLExpressionBuilder");
+      }
+    }
 
     /// <summary>
     /// Builds the <c>CalcOperation</c>.
@@ -174,14 +362,14 @@ namespace Nixill.CalcLib.Parsing {
 
       // Postfix and Binary operators require a left operand.
       if (!(Operator is CLPrefixOperator)) {
-        if (LeftExp != null) LeftObj = LeftExp.Build();
+        if (LeftExp != null) Left = LeftExp.Build();
         if (LeftObj == null) throw new InvalidOperationException(operType + " requires a left-side operand.");
       }
       else LeftObj = null;
 
       // Prefix and Binary operators require a left operand.
       if (!(Operator is CLPostfixOperator)) {
-        if (RightExp != null) RightObj = RightExp.Build();
+        if (RightExp != null) Right = RightExp.Build();
         if (RightObj == null) throw new InvalidOperationException(operType + " requires a right-side operand.");
       }
       else RightObj = null;

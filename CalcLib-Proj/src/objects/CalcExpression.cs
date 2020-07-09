@@ -63,6 +63,16 @@ namespace Nixill.CalcLib.Objects {
     /// </summary>
     public int Count => Params.Length;
 
+    /// <summary>
+    /// Creates a new <c>CalcCodeFunction</c>.
+    /// </summary>
+    /// <param name="name">The name of the function to call.</param>
+    /// <param name="pars">The parameters for the called function.</param>
+    public CalcCodeFunction(string name, CalcObject[] pars) {
+      Function = CLCodeFunction.Get(name);
+      Params = pars;
+    }
+
     public override CalcValue GetValue(CLLocalStore vars, object context = null) =>
       Function.FunctionDef.Invoke(Params, context, vars);
 
@@ -213,6 +223,12 @@ namespace Nixill.CalcLib.Objects {
     ///   the expression is being evaluated.</param>
     public CalcObject GetObject(CLLocalStore vars = null, object context = null) {
       vars = vars ?? new CLLocalStore();
+
+      if (Name.StartsWith("!")) {
+        if (CLCodeFunction.Exists(Name.Substring(1))) {
+          return new CalcCodeFunction(Name.Substring(1), Params);
+        }
+      }
 
       if (Name.StartsWith("*") || Name.StartsWith("^")) {
         if (!(vars.ContainsVar(Name))) throw new CalcException("No variable named " + Name + " exists.");
