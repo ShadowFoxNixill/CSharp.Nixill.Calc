@@ -74,7 +74,11 @@ namespace Nixill.CalcLib.Modules {
     }
 
     private static CalcValue BinMinusFunc(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
-      // This one's a bit less involved than the other.
+      return CLBinaryOperator.Get("+").Run(left, CLPrefixOperator.Get("-").Run(right, vars, context), vars, context);
+    }
+
+    private static CalcValue BinTimesFunc(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+
     }
   }
 }
