@@ -38,7 +38,7 @@ namespace Nixill.CalcLib.Varaibles {
           return InternalStorage[name];
         }
         catch (KeyNotFoundException e) {
-          throw new CalcException(e);
+          throw new CLException(e);
         }
       }
       else return data.Value;

@@ -1,3 +1,4 @@
+using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Operators;
 using Nixill.CalcLib.Varaibles;
@@ -78,7 +79,116 @@ namespace Nixill.CalcLib.Modules {
     }
 
     private static CalcValue BinTimesFunc(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+      // This method takes four forms.
+      CalcValue valLeft = left.GetValue(vars, context);
+      CalcValue valRight = right.GetValue(vars, context);
 
+      // First form: Product of two numbers.
+      CalcNumber numLeft = valLeft as CalcNumber;
+      CalcNumber numRight = valRight as CalcNumber;
+
+      if (numLeft != null && numRight != null) return new CalcNumber(numLeft * numRight);
+
+      // Second and third forms: List times number.
+      CalcList lstLeft = valLeft as CalcList;
+      CalcList lstRight = valRight as CalcList;
+
+      // Let's make this commutative more easily.
+      if (numLeft != null && lstRight != null) {
+        lstLeft = lstRight;
+        numRight = numLeft;
+        lstRight = null;
+        numLeft = null;
+      }
+      // But if it's dual lists, the right list has to become a number instead.
+      else if (lstLeft != null && lstRight != null) numRight = lstRight.Sum();
+
+      if (lstLeft != null && numRight != null) {
+        CalcValue[] lstRet;
+
+        if (!lstLeft.HasString()) {
+          // Returns the list with all numbers multiplied by this list entry.
+          lstRet = new CalcValue[lstLeft.Count];
+          for (int i = 0; i < lstLeft.Count; i++) {
+            lstRet[i] = BinTimesFunc(lstLeft[i], right, vars, context);
+          }
+          return new CalcList(lstRet);
+        }
+        else {
+          // Returns the list repeated the number times.
+          int intRight = (int)(numRight);
+          if (intRight < 0) throw new CLException("Lists containing strings cannot be repeated negative times.");
+
+          lstRet = new CalcValue[lstLeft.Count * (intRight)];
+          for (int j = 0; j < numRight; j++) {
+            for (int i = 0; i < lstLeft.Count; i++) {
+              lstRet[j * lstLeft.Count + i] = lstLeft[i];
+            }
+          }
+          return new CalcList(lstRet);
+        }
+      }
+
+      // Fourth form: String times number
+      // (If the other is a list then it should be summed)
+      CalcString strLeft = valLeft as CalcString;
+      CalcString strRight = valRight as CalcString;
+
+      // Swap if we have the string on the right
+      if ((numLeft != null || lstLeft != null) && strRight != null) {
+        strLeft = strRight;
+        numRight = numLeft;
+        lstRight = lstLeft;
+        strRight = null;
+        numLeft = null;
+        lstLeft = null;
+      }
+
+      // If we have a list instead of a number, sum the list
+      if (lstRight != null) numRight = lstRight.Sum();
+
+      if (numRight == null) throw new CLException("Strings cannot be multiplied by strings.");
+
+      string ret = "";
+      int retCount = (int)(numRight);
+
+      if (retCount < 0) throw new CLException("Strings cannot be repeated negative times.");
+
+      for (int i = 0; i < retCount; i++) {
+        ret += strLeft;
+      }
+
+      return new CalcString(ret);
+    }
+
+    private static CalcValue BinDivideFunc(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+      // This method takes two forms.
+      CalcValue valLeft = left.GetValue(vars, context);
+      CalcValue valRight = right.GetValue(vars, context);
+
+      // First off, strings are banned.
+      if (valLeft is CalcString || valRight is CalcString) throw new CLException("Strings cannot be divided.");
+
+      // First form: Product of two numbers.
+      CalcNumber numLeft = valLeft as CalcNumber;
+      CalcNumber numRight = valRight as CalcNumber;
+
+      // If the right side's a list, we have to make it a number.
+      CalcList lstRight = valRight as CalcList;
+      if (lstRight != null) numRight = lstRight.Sum();
+
+      if (numLeft != null && numRight != null) return new CalcNumber(numLeft / numRight);
+
+      // Second form: List times number.
+      CalcList lstLeft = valLeft as CalcList;
+
+      if (lstLeft.HasString()) throw new CLException("Strings cannot be divided.");
+
+      CalcValue[] lstRet = new CalcValue[lstLeft.Count];
+      for (int i = 0; i < lstLeft.Count; i++) {
+        lstRet[i] = BinTimesFunc(lstLeft[i], right, vars, context);
+      }
+      return new CalcList(lstRet);
     }
   }
 }

@@ -136,7 +136,7 @@ namespace Nixill.CalcLib.Objects {
     public decimal Sum() {
       decimal sum = 0;
       foreach (CalcValue val in _list) {
-        if (val is CalcString) throw new CalcException("Strings cannot be summed.");
+        if (val is CalcString) throw new CLException("Strings cannot be summed.");
         if (val is CalcList cl) sum += cl.Sum();
         else if (val is CalcNumber cd) sum += cd.Value;
       }

@@ -4,12 +4,12 @@ namespace Nixill.CalcLib.Exception {
   /// <summary>
   /// An exception thrown when a calculation errors.
   /// </summary>
-  public class CalcException : System.Exception {
+  public class CLException : System.Exception {
     /// <summary>
     /// Creates a CalcException with a message.
     /// </summary>
     /// <param name="message">The message to be displayed.</param>
-    public CalcException(string message) : base(message) { }
+    public CLException(string message) : base(message) { }
 
     /// <summary>
     /// Creates a CalcException with a base exception and an optional
@@ -18,6 +18,6 @@ namespace Nixill.CalcLib.Exception {
     /// <param name="basex">The exception that caused this
     ///   <c>CalcException</c>.</param>
     /// <param name="message">The message to be displayed.</param>
-    public CalcException(SystemException basex, string message = "") : base(message, basex) { }
+    public CLException(SystemException basex, string message = "") : base(message, basex) { }
   }
 }

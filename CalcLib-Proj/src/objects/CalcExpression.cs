@@ -231,7 +231,7 @@ namespace Nixill.CalcLib.Objects {
       }
 
       if (Name.StartsWith("*") || Name.StartsWith("^")) {
-        if (!(vars.ContainsVar(Name))) throw new CalcException("No variable named " + Name + " exists.");
+        if (!(vars.ContainsVar(Name))) throw new CLException("No variable named " + Name + " exists.");
         else return vars[Name];
       }
 
@@ -239,7 +239,7 @@ namespace Nixill.CalcLib.Objects {
       if (Int32.TryParse(Name, out count)) {
         if (vars.VarCount > count) return vars[count];
         else if (Params.Length > 0) return Params[1];
-        else throw new CalcException("No parameter #" + count + " exists.");
+        else throw new CLException("No parameter #" + count + " exists.");
       }
 
       if (Name == "...") {
@@ -249,7 +249,7 @@ namespace Nixill.CalcLib.Objects {
       CalcObject ret = CLVariables.Load(Name, context);
       if (ret != null) return ret;
 
-      throw new CalcException("No variable named " + Name + " exists.");
+      throw new CLException("No variable named " + Name + " exists.");
     }
 
     public override CalcValue GetValue(CLLocalStore vars, object context = null) {
