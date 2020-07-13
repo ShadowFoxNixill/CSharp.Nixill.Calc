@@ -290,7 +290,7 @@ namespace Nixill.CalcLib.Operators {
     /// Iff <c>true</c>, the functions that handle types more derived than
     /// <c>left</c> and <c>right</c> should be removed from this operator.
     /// </param>
-    public virtual void AddFunction(Type left, Type right, CLBinaryOperatorFunc func, bool replaceChildren) {
+    public virtual void AddFunction(Type left, Type right, CLBinaryOperatorFunc func, bool replaceChildren = true) {
       Dictionary<Type, CLBinaryOperatorFunc> subDict;
 
       if (!Functions.ContainsKey(left)) {
@@ -392,7 +392,7 @@ namespace Nixill.CalcLib.Operators {
     /// Iff <c>true</c>, the functions that handle types more derived than
     /// <c>param</c> should be removed from this operator.
     /// </param>
-    public void AddFunction(Type param, CLUnaryOperatorFunc func, bool replaceChildren) {
+    public void AddFunction(Type param, CLUnaryOperatorFunc func, bool replaceChildren = true) {
       Functions[param] = func;
 
       // Now replace all the child types if necessary.
