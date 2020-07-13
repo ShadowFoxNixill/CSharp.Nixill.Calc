@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -8,10 +9,7 @@ using Nixill.CalcLib.Varaibles;
 using Nixill.Utils;
 
 namespace Nixill.CalcLib.Operators {
-  /// <summary>
-  /// Represents an operator within an expression.
-  /// </summary>
-  public abstract class CLOperator {
+  public static class CLOperators {
     private static HashSet<int> FromRightOperators = new HashSet<int>();
 
     /// <summary>
@@ -36,9 +34,13 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="level">The level to check.</param>
     public static bool IsFromRight(int level) => FromRightOperators.Contains(level);
 
-    internal static Dictionary<string, CLOperator> PrefixOperators = new Dictionary<string, CLOperator>();
-    internal static Dictionary<string, CLOperator> BinaryOperators = new Dictionary<string, CLOperator>();
-    internal static Dictionary<string, CLOperator> PostfixOperators = new Dictionary<string, CLOperator>();
+    // internal static Dictionary<string, CLOperator> PrefixOperators = new Dictionary<string, CLOperator>();
+    // internal static Dictionary<string, CLOperator> BinaryOperators = new Dictionary<string, CLOperator>();
+    // internal static Dictionary<string, CLOperator> PostfixOperators = new Dictionary<string, CLOperator>();
+
+    public static readonly CLOperatorList<CLPrefixOperator> PrefixOperators = new CLOperatorList<CLPrefixOperator>();
+    public static readonly CLOperatorList<CLBinaryOperator> BinaryOperators = new CLOperatorList<CLBinaryOperator>();
+    public static readonly CLOperatorList<CLPostfixOperator> PostfixOperators = new CLOperatorList<CLPostfixOperator>();
 
     private static string ptnPrefix;
     private static string ptnPostfix;
@@ -47,7 +49,7 @@ namespace Nixill.CalcLib.Operators {
     private static Regex rgxPostfix;
     private static Regex rgxCombined;
     private static Regex rgxSymbol = new Regex(@"([^a-zA-Z0-9])");
-    private static bool rgxInitiated = false;
+    internal static bool rgxInitiated = false;
 
     public static List<CLObjectPiece> GetOpers(string input, bool prefix, bool postfix, int pos) {
       // First, let's see if the whole thing matches an operator.
@@ -141,9 +143,9 @@ namespace Nixill.CalcLib.Operators {
     }
 
     // Takes the keys from a dictionary and turns them into a regex that matches any one key
-    private static string KeysToPattern(Dictionary<string, CLOperator> dict) {
+    private static string KeysToPattern(string[] keys) {
       string ret = "";
-      foreach (string key in dict.Keys) {
+      foreach (string key in keys) {
         ret += "|" + rgxSymbol.Replace(key, @"\\$1");
       }
       return "(" + ret.Substring(1) + ")";
@@ -151,23 +153,43 @@ namespace Nixill.CalcLib.Operators {
 
     // Initializes regexes with the existing keys
     private static void InitRegexes() {
-      string ptnPrefix = KeysToPattern(PrefixOperators);
+      string ptnPrefix = KeysToPattern(PrefixOperators.Keys);
       rgxPrefix = new Regex(ptnPrefix);
 
-      string ptnPostfix = KeysToPattern(PostfixOperators);
+      string ptnPostfix = KeysToPattern(PostfixOperators.Keys);
       rgxPostfix = new Regex(ptnPostfix);
 
-      string ptnBinary = KeysToPattern(BinaryOperators);
+      string ptnBinary = KeysToPattern(BinaryOperators.Keys);
       rgxCombined = new Regex("(" + ptnPostfix + "*)" + ptnBinary + "(" + ptnPrefix + "*)");
 
       rgxInitiated = true;
     }
+  }
 
+  public class CLOperatorList<T> where T : CLOperator {
+    private Dictionary<string, T> OperList = new Dictionary<string, T>();
+
+    public T this[string key] {
+      get => OperList[key];
+      internal set => OperList[key] = value;
+    }
+
+    public bool ContainsKey(string key) => OperList.ContainsKey(key);
+
+    public T GetOrNull(string key) {
+      if (ContainsKey(key)) return OperList[key];
+      else return null;
+    }
+
+    public string[] Keys => OperList.Keys.ToArray();
+  }
+
+  public abstract class CLOperator {
     internal CLOperator() {
-      if (this is CLBinaryOperator bin) BinaryOperators.Add(bin.Symbol, bin);
-      if (this is CLPrefixOperator pre) PrefixOperators.Add(pre.Symbol, pre);
-      if (this is CLPostfixOperator post) PostfixOperators.Add(post.Symbol, post);
-      rgxInitiated = false;
+      if (this is CLBinaryOperator bin) CLOperators.BinaryOperators[bin.Symbol] = bin;
+      if (this is CLPrefixOperator pre) CLOperators.PrefixOperators[pre.Symbol] = pre;
+      if (this is CLPostfixOperator post) CLOperators.PostfixOperators[post.Symbol] = post;
+      CLOperators.rgxInitiated = false;
     }
 
     /// <summary>The priority of a given <c>CLOperator</c>.</summary>
@@ -185,23 +207,53 @@ namespace Nixill.CalcLib.Operators {
   /// Represents a binary (two-operand) <c>CLOperator</c>.
   /// </summary>
   public class CLBinaryOperator : CLOperator {
+    private Dictionary<Type, Dictionary<Type, CLBinaryOperatorFunc>> Functions = new Dictionary<Type, Dictionary<Type, CLBinaryOperatorFunc>>();
+
     /// <summary>
-    /// The <c>Func</c> that powers this <c>CLBinaryOperator</c>.
+    /// Iff <c>true</c>, this <c>CLBinaryOperator</c> only deals with
+    /// values for its left operand.
     /// </summary>
-    public Func<CalcObject, CalcObject, CLLocalStore, object, CalcValue> Function { get; }
+    public readonly bool ValueBasedLeft = false;
+
+    /// <summary>
+    /// Iff <c>true</c>, this <c>CLBinaryOperator</c> only deals with
+    /// values for its right operand.
+    /// </summary>
+    public readonly bool ValueBasedRight = false;
+
+    /// <summary>
+    /// Returns the function that'll be run for the given types.
+    /// </summary>
+    public virtual CLBinaryOperatorFunc this[Type left, Type right] {
+      get {
+        for (; left != typeof(object); left = left.BaseType) {
+          if (Functions.ContainsKey(left)) {
+            for (Type r = right; r != typeof(object); r = r.BaseType) {
+              if (Functions.ContainsKey(right)) return Functions[left][right];
+            }
+          }
+        }
+
+        return null;
+      }
+    }
 
     /// <summary>
     /// Creates a new <c>CLBinaryOperator</c>.
     /// </summary>
     /// <param name="symbol">The symbol the operator should use.</param>
     /// <param name="priority">The priority of the operator.</param>
-    /// <param name="function">
-    /// The backing <c>Func</c> of the operator.
+    /// <param name="valLeft">
+    /// Whether or not the operator is value-based on its left side.
     /// </param>
-    public CLBinaryOperator(string symbol, int priority, Func<CalcObject, CalcObject, CLLocalStore, object, CalcValue> function) {
+    /// <param name="valRight">
+    /// Whether or not the operator is value-based on its right side.
+    /// </param>
+    public CLBinaryOperator(string symbol, int priority, bool valLeft, bool valRight) {
       Symbol = symbol;
       Priority = priority;
-      Function = function;
+      ValueBasedLeft = valLeft;
+      ValueBasedRight = valRight;
     }
 
     /// <summary>Runs the Operator on two operands.</summary>
@@ -209,49 +261,154 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="right">The right operand.</param>
     /// <param name="vars">The local variable storage.</param>
     /// <param name="context">An object representing context.</param>
-    public CalcValue Run(CalcObject left, CalcObject right, CLLocalStore vars = null, object context = null) => Function.Invoke(left, right, vars ?? new CLLocalStore(), context);
+    public CalcValue Run(CalcObject left, CalcObject right, CLLocalStore vars = null, object context = null) {
+      // If the operator is value-based, we'll automatically convert expressions.
+      if (ValueBasedLeft) left = left.GetValue(vars, context);
+      if (ValueBasedRight) right = right.GetValue(vars, context);
 
-    public override string ToString() => "bin:" + Symbol;
+      // Now get the func.
+      CLBinaryOperatorFunc func = this[left.GetType(), right.GetType()];
+
+      // If it's null, we'll throw an exception.
+      if (func == null) throw new CLException(
+        "Binary operator " + Symbol + " doesn't support parameters " + left.GetType().Name + " and " + right.GetType().Name
+      );
+
+      // Now let's run it.
+      return func(left, right, vars, context);
+    }
 
     /// <summary>
-    /// Returns the <c>CLBinaryOperator</c> with the given <c>symbol</c>.
+    /// Adds a new function for the given types.
     /// </summary>
-    /// <param name="symbol">The symbol for which to check.</param>
-    /// <exception cref="KeyNotFoundException">
-    /// If there is no <c>CLBinaryOperator</c> with that <c>symbol</c>.
-    /// </exception>
-    public static CLBinaryOperator Get(string symbol) => (CLBinaryOperator)BinaryOperators[symbol];
+    /// <param name="left">The type of the left operand.</param>
+    /// <param name="right">The type of the right operand.</param>
+    /// <param name="func">
+    /// The function that handles those operands.
+    /// </param>
+    /// <param name="replaceChildren">
+    /// Iff <c>true</c>, the functions that handle types more derived than
+    /// <c>left</c> and <c>right</c> should be removed from this operator.
+    /// </param>
+    public virtual void AddFunction(Type left, Type right, CLBinaryOperatorFunc func, bool replaceChildren) {
+      Dictionary<Type, CLBinaryOperatorFunc> subDict;
+
+      if (!Functions.ContainsKey(left)) {
+        subDict = new Dictionary<Type, CLBinaryOperatorFunc>();
+        Functions[left] = subDict;
+      }
+      else subDict = Functions[left];
+
+      subDict[right] = func;
+
+      // Now replace all the child types if necessary.
+      if (replaceChildren) {
+        foreach (Type leftTest in Functions.Keys) {
+          if (leftTest.IsSubclassOf(left) || leftTest == left) {
+            foreach (Type rightTest in Functions[left].Keys) {
+              if (rightTest.IsSubclassOf(right) || (rightTest == right && leftTest != left)) {
+                Functions[left].Remove(right);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    public override string ToString() => "bin:" + Symbol;
   }
+
+  public delegate CalcValue CLBinaryOperatorFunc(CalcObject left, CalcObject right, CLLocalStore vars, object context);
 
   /// <summary>
   /// Represents a unary (one-operand) <c>CLOperator</c>.
   /// </summary>
-  public abstract class CLUnaryOperator : CLOperator {
+  public class CLUnaryOperator : CLOperator {
+    private Dictionary<Type, CLUnaryOperatorFunc> Functions = new Dictionary<Type, CLUnaryOperatorFunc>();
+
     /// <summary>
-    /// The <c>Func</c> that powers this <c>CLUnaryOperator</c>.
+    /// Iff <c>true</c>, this <c>CLUnaryOperator</c> only deals with
+    /// values.
     /// </summary>
-    public Func<CalcObject, CLLocalStore, object, CalcValue> Function { get; }
+    public readonly bool ValueBased = false;
+
     /// <summary>
     /// Whether the operator precedes (<c>true</c>) or follows
     ///   (<c>false</c>) the operand.
     /// </summary>
     public bool IsPrefix { get; }
 
-    internal CLUnaryOperator(string symbol, int priority, bool isPrefix, Func<CalcObject, CLLocalStore, object, CalcValue> function) {
-      Symbol = symbol;
-      Priority = priority;
-      Function = function;
-      IsPrefix = isPrefix;
+    public CLUnaryOperatorFunc this[Type param] {
+      get {
+        for (; param != typeof(object); param = param.BaseType) {
+          if (Functions.ContainsKey(param)) return Functions[param];
+        }
+
+        return null;
+      }
     }
 
-    /// <summary>Runs the Operator on an operand.</summary>
-    /// <param name="operand">The operand.</param>
+    /// <summary>
+    /// Creates a new <c>CLUnaryOperator</c>.
+    /// </summary>
+    /// <param name="symbol">The symbol the operator should use.</param>
+    /// <param name="priority">The priority of the operator.</param>
+    /// <param name="valBased">
+    /// Whether or not the operator is value-based.
+    /// </param>
+    public CLUnaryOperator(string symbol, int priority, bool isPrefix, bool valBased) {
+      Symbol = symbol;
+      Priority = priority;
+      IsPrefix = isPrefix;
+      ValueBased = valBased;
+    }
+
+    /// <summary>Runs the Operator on two operands.</summary>
+    /// <param name="param">The right operand.</param>
     /// <param name="vars">The local variable storage.</param>
     /// <param name="context">An object representing context.</param>
-    public CalcValue Run(CalcObject operand, CLLocalStore vars = null, object context = null) => Function.Invoke(operand, vars ?? new CLLocalStore(), context);
+    public CalcValue Run(CalcObject param, CLLocalStore vars = null, object context = null) {
+      // If the operator is value-based, we'll automatically convert expressions.
+      if (ValueBased) param = param.GetValue(vars, context);
 
-    public override string ToString() => (IsPrefix ? "pre:" : "post:") + Symbol;
+      // Now get the func.
+      CLUnaryOperatorFunc func = this[param.GetType()];
+
+      // If it's null, we'll throw an exception.
+      if (func == null) throw new CLException(
+        "Binary operator " + Symbol + " doesn't support parameter " + param.GetType().Name
+      );
+
+      // Now let's run it.
+      return func(param, vars, context);
+    }
+
+    /// <summary>
+    /// Adds a new function for the given types.
+    /// </summary>
+    /// <param name="param">The type of the operand.</param>
+    /// <param name="func">The function that handles this operand.</param>
+    /// <param name="replaceChildren">
+    /// Iff <c>true</c>, the functions that handle types more derived than
+    /// <c>param</c> should be removed from this operator.
+    /// </param>
+    public void AddFunction(Type param, CLUnaryOperatorFunc func, bool replaceChildren) {
+      Functions[param] = func;
+
+      // Now replace all the child types if necessary.
+      if (replaceChildren) {
+        foreach (Type paramTest in Functions.Keys) {
+          if (paramTest.IsSubclassOf(param)) {
+            Functions.Remove(param);
+          }
+        }
+      }
+    }
+
+    public override string ToString() => "bin:" + Symbol;
   }
+
+  public delegate CalcValue CLUnaryOperatorFunc(CalcObject param, CLLocalStore vars, object context);
 
   /// <summary>
   /// Represents a prefix-based <c>CLUnaryOperator</c>.
@@ -262,19 +419,10 @@ namespace Nixill.CalcLib.Operators {
     /// </summary>
     /// <param name="symbol">The symbol the operator should use.</param>
     /// <param name="priority">The priority of the operator.</param>
-    /// <param name="function">
-    /// The backing <c>Func</c> of the operator.
+    /// <param name="isValueBased">
+    /// Whether or not the <c>CLPrefixOperator</c> is value-based.
     /// </param>
-    public CLPrefixOperator(string symbol, int priority, Func<CalcObject, CLLocalStore, object, CalcValue> function) : base(symbol, priority, true, function) { }
-
-    /// <summary>
-    /// Returns the <c>CLPrefixOperator</c> with the given <c>symbol</c>.
-    /// </summary>
-    /// <param name="symbol">The symbol for which to check.</param>
-    /// <exception cref="KeyNotFoundException">
-    /// If there is no <c>CLPrefixOperator</c> with that <c>symbol</c>.
-    /// </exception>
-    public static CLPrefixOperator Get(string symbol) => (CLPrefixOperator)PrefixOperators[symbol];
+    public CLPrefixOperator(string symbol, int priority, bool isValueBased) : base(symbol, priority, true, isValueBased) { }
   }
 
   /// <summary>
@@ -286,18 +434,9 @@ namespace Nixill.CalcLib.Operators {
     /// </summary>
     /// <param name="symbol">The symbol the operator should use.</param>
     /// <param name="priority">The priority of the operator.</param>
-    /// <param name="function">
-    /// The backing <c>Func</c> of the operator.
+    /// <param name="isValueBased">
+    /// Whether or not the <c>CLPostfixOperator</c> is value-based.
     /// </param>
-    public CLPostfixOperator(string symbol, int priority, Func<CalcObject, CLLocalStore, object, CalcValue> function) : base(symbol, priority, true, function) { }
-
-    /// <summary>
-    /// Returns the <c>CLPostfixOperator</c> with the given <c>symbol</c>.
-    /// </summary>
-    /// <param name="symbol">The symbol for which to check.</param>
-    /// <exception cref="KeyNotFoundException">
-    /// If there is no <c>CLPostfixOperator</c> with that <c>symbol</c>.
-    /// </exception>
-    public static CLPostfixOperator Get(string symbol) => (CLPostfixOperator)PostfixOperators[symbol];
+    public CLPostfixOperator(string symbol, int priority, bool isValueBased) : base(symbol, priority, true, isValueBased) { }
   }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Varaibles;
 
@@ -8,13 +9,33 @@ namespace Nixill.CalcLib.Operators {
   ///   common function.
   /// </summary>
   public class CLComparisonOperatorSet {
-    public Func<CalcObject, CLComparison, CalcObject, CLLocalStore, object, CalcValue> CompFunction { get; }
+    private Dictionary<Type, Dictionary<Type, CLComparisonFunc>> Functions = new Dictionary<Type, Dictionary<Type, CLComparisonFunc>>();
+
+    /// <summary>
+    /// Returns the function that'll be run for the given types.
+    /// </summary>
+    public CLComparisonFunc this[Type left, Type right] {
+      get {
+        for (; left != typeof(object); left = left.BaseType) {
+          if (Functions.ContainsKey(left)) {
+            for (Type r = right; r != typeof(object); r = r.BaseType) {
+              if (Functions.ContainsKey(right)) return Functions[left][right];
+            }
+          }
+        }
+
+        return null;
+      }
+    }
+
     public string PrefixSymbol { get; }
     public int Priority { get; }
+    public bool ValueBasedLeft { get; }
+    public bool ValueBasedRight { get; }
 
     /// <summary>
     /// The <c>CLComparisonOperator</c> for Greater Than.
-    /// </summary>
+    /// </summary>+
     public CLComparisonOperator Greater { get; }
 
     /// <summary>
@@ -61,10 +82,19 @@ namespace Nixill.CalcLib.Operators {
     /// </param>
     /// <param name="priority">The priority of the operators.</param>
     /// <param name="compFunction">The function that runs.</param>
-    public CLComparisonOperatorSet(string prefix, int priority, Func<CalcObject, CLComparison, CalcObject, CLLocalStore, object, CalcValue> compFunction) {
+    /// <param name="valLeft">
+    /// Whether or not these <c>CLComparisonOperators</c> are value-based
+    /// on their left sides.
+    /// </param>
+    /// <param name="valRight">
+    /// Whether or not these <c>CLComparisonOperators</c> are value-based
+    /// on their right sides.
+    /// </param>
+    public CLComparisonOperatorSet(string prefix, int priority, bool valLeft, bool valRight) {
       PrefixSymbol = prefix;
       Priority = priority;
-      CompFunction = compFunction;
+      ValueBasedLeft = valLeft;
+      ValueBasedRight = valRight;
 
       Greater = new CLComparisonOperator(this, CLComparison.Greater);
       Equal = new CLComparisonOperator(this, CLComparison.Equal);
@@ -76,6 +106,8 @@ namespace Nixill.CalcLib.Operators {
       NotModulo = new CLComparisonOperator(this, CLComparison.NotModulo);
     }
   }
+
+  public delegate CalcValue CLComparisonFunc(CalcObject left, CLComparison comp, CalcObject right, CLLocalStore vars, object context);
 
   /// <summary>
   /// A single comparison, with its own symbol and comparison condition.
@@ -150,7 +182,39 @@ namespace Nixill.CalcLib.Operators {
   /// <seealso cref="CLBinaryOperator"/>
   /// <seealso cref="CLComparisonOperatorSet"/>
   public class CLComparisonOperator : CLBinaryOperator {
+    /// <summary>
+    /// The <c>CLComparisonOperatorSet</c> of which this
+    /// <c>CLComparisonOperator</c> is a part.
+    /// </summary>
+    public CLComparisonOperatorSet Parent { get; internal set; }
+
+    /// <summary>
+    /// The <c>CLComparison</c> that this <c>CLComparisonOperator</c>
+    /// uses in its <c>CLComparisonFunc</c>.
+    /// </summary>
+    public CLComparison Comparison { get; internal set; }
+
+    public override CLBinaryOperatorFunc this[Type left, Type right] {
+      get {
+        CLComparisonFunc func = Parent[left, right];
+
+        if (func != null) return (l, r, vars, context) => Parent[left, right](l, Comparison, r, vars, context);
+        else return null;
+      }
+    }
+
     internal CLComparisonOperator(CLComparisonOperatorSet set, CLComparison comp) :
-      base(set.PrefixSymbol + comp.PostfixSymbol, set.Priority, (left, right, vars, context) => set.CompFunction(left, comp, right, vars, context)) { }
+      base(set.PrefixSymbol + comp.PostfixSymbol, set.Priority, set.ValueBasedLeft, set.ValueBasedRight) {
+      Parent = set;
+      Comparison = comp;
+    }
+
+    /// <summary>
+    /// Throws an <c>InvalidOperationException</c>. To add a function, go
+    /// through the <c>Parent</c> instead.
+    /// </summary>
+    public override void AddFunction(Type left, Type right, CLBinaryOperatorFunc func, bool replaceChildren) {
+      throw new InvalidOperationException("For a CLComparisonOperator, functions must be added through the set.");
+    }
   }
 }

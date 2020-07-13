@@ -108,9 +108,9 @@ namespace Nixill.CalcLib.Parsing {
         CLOperator op = null;
         valueLast = false;
 
-        if (piece.Type == CLObjectPieceType.BinaryOperator) op = CLBinaryOperator.Get(piece.Contents);
-        else if (piece.Type == CLObjectPieceType.PrefixOperator) op = CLPrefixOperator.Get(piece.Contents);
-        else if (piece.Type == CLObjectPieceType.PostfixOperator) op = CLPostfixOperator.Get(piece.Contents);
+        if (piece.Type == CLObjectPieceType.BinaryOperator) op = CLOperators.BinaryOperators[piece.Contents];
+        else if (piece.Type == CLObjectPieceType.PrefixOperator) op = CLOperators.PrefixOperators[piece.Contents];
+        else if (piece.Type == CLObjectPieceType.PostfixOperator) op = CLOperators.PostfixOperators[piece.Contents];
 
         expNew.Operator = op;
 
@@ -145,7 +145,7 @@ namespace Nixill.CalcLib.Parsing {
                 // The next expression on the stack is equal priority,
                 // but evaluated left-to-right
                 (expNext.Operator.Priority == op.Priority &&
-                  !CLOperator.IsFromRight(op.Priority))
+                  !CLOperators.IsFromRight(op.Priority))
               ) {
                 expOld = exps.Last.Value;
                 exps.RemoveLast();
