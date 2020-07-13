@@ -11,6 +11,7 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents an operator within an expression.
   /// </summary>
+  [Obsolete]
   public abstract class CLOperator {
     private static HashSet<int> FromRightOperators = new HashSet<int>();
 
@@ -184,6 +185,7 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents a binary (two-operand) <c>CLOperator</c>.
   /// </summary>
+  [Obsolete]
   public class CLBinaryOperator : CLOperator {
     /// <summary>
     /// The <c>Func</c> that powers this <c>CLBinaryOperator</c>.
@@ -226,6 +228,7 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents a unary (one-operand) <c>CLOperator</c>.
   /// </summary>
+  [Obsolete]
   public abstract class CLUnaryOperator : CLOperator {
     /// <summary>
     /// The <c>Func</c> that powers this <c>CLUnaryOperator</c>.
@@ -256,6 +259,7 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents a prefix-based <c>CLUnaryOperator</c>.
   /// </summary>
+  [Obsolete]
   public class CLPrefixOperator : CLUnaryOperator {
     /// <summary>
     /// Creates a new <c>CLPrefixOperator</c>.
@@ -280,6 +284,7 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents a postfix-based <c>CLUnaryOperator</c>.
   /// </summary>
+  [Obsolete]
   public class CLPostfixOperator : CLUnaryOperator {
     /// <summary>
     /// Creates a new <c>CLPostfixOperator</c>.

@@ -7,6 +7,7 @@ namespace Nixill.CalcLib.Operators {
   /// Provides a set of eight <c>CLComparisonOperator</c>s that share a
   ///   common function.
   /// </summary>
+  [Obsolete]
   public class CLComparisonOperatorSet {
     public Func<CalcObject, CLComparison, CalcObject, CLLocalStore, object, CalcValue> CompFunction { get; }
     public string PrefixSymbol { get; }
@@ -80,6 +81,7 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// A single comparison, with its own symbol and comparison condition.
   /// </summary>
+  [Obsolete]
   public class CLComparison {
     /// <summary>The symbol for the comparison.</summary>
     public string PostfixSymbol { get; }
@@ -149,6 +151,7 @@ namespace Nixill.CalcLib.Operators {
   /// </summary>
   /// <seealso cref="CLBinaryOperator"/>
   /// <seealso cref="CLComparisonOperatorSet"/>
+  [Obsolete]
   public class CLComparisonOperator : CLBinaryOperator {
     internal CLComparisonOperator(CLComparisonOperatorSet set, CLComparison comp) :
       base(set.PrefixSymbol + comp.PostfixSymbol, set.Priority, (left, right, vars, context) => set.CompFunction(left, comp, right, vars, context)) { }
