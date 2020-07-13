@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -37,9 +38,9 @@ namespace Nixill.CalcLib.Operators {
     // internal static Dictionary<string, CLOperator> BinaryOperators = new Dictionary<string, CLOperator>();
     // internal static Dictionary<string, CLOperator> PostfixOperators = new Dictionary<string, CLOperator>();
 
-    public static readonly CLOperatorList PrefixOperators = new CLOperatorList();
-    public static readonly CLOperatorList BinaryOperators = new CLOperatorList();
-    public static readonly CLOperatorList PostfixOperators = new CLOperatorList();
+    public static readonly CLOperatorList<CLPrefixOperator> PrefixOperators = new CLOperatorList<CLPrefixOperator>();
+    public static readonly CLOperatorList<CLBinaryOperator> BinaryOperators = new CLOperatorList<CLBinaryOperator>();
+    public static readonly CLOperatorList<CLPostfixOperator> PostfixOperators = new CLOperatorList<CLPostfixOperator>();
 
     private static string ptnPrefix;
     private static string ptnPostfix;
@@ -142,9 +143,9 @@ namespace Nixill.CalcLib.Operators {
     }
 
     // Takes the keys from a dictionary and turns them into a regex that matches any one key
-    private static string KeysToPattern(CLOperatorList dict) {
+    private static string KeysToPattern(string[] keys) {
       string ret = "";
-      foreach (string key in dict.Keys) {
+      foreach (string key in keys) {
         ret += "|" + rgxSymbol.Replace(key, @"\\$1");
       }
       return "(" + ret.Substring(1) + ")";
@@ -152,30 +153,35 @@ namespace Nixill.CalcLib.Operators {
 
     // Initializes regexes with the existing keys
     private static void InitRegexes() {
-      string ptnPrefix = KeysToPattern(PrefixOperators);
+      string ptnPrefix = KeysToPattern(PrefixOperators.Keys);
       rgxPrefix = new Regex(ptnPrefix);
 
-      string ptnPostfix = KeysToPattern(PostfixOperators);
+      string ptnPostfix = KeysToPattern(PostfixOperators.Keys);
       rgxPostfix = new Regex(ptnPostfix);
 
-      string ptnBinary = KeysToPattern(BinaryOperators);
+      string ptnBinary = KeysToPattern(BinaryOperators.Keys);
       rgxCombined = new Regex("(" + ptnPostfix + "*)" + ptnBinary + "(" + ptnPrefix + "*)");
 
       rgxInitiated = true;
     }
   }
 
-  public class CLOperatorList {
-    private Dictionary<string, CLOperator> OperList = new Dictionary<string, CLOperator>();
+  public class CLOperatorList<T> where T : CLOperator {
+    private Dictionary<string, T> OperList = new Dictionary<string, T>();
 
-    public CLOperator this[string key] {
+    public T this[string key] {
       get => OperList[key];
       internal set => OperList[key] = value;
     }
 
     public bool ContainsKey(string key) => OperList.ContainsKey(key);
 
-    public Dictionary<string, CLOperator>.KeyCollection Keys => OperList.Keys;
+    public T GetOrNull(string key) {
+      if (ContainsKey(key)) return OperList[key];
+      else return null;
+    }
+
+    public string[] Keys => OperList.Keys.ToArray();
   }
 
   public abstract class CLOperator {
