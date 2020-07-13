@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Varaibles;
 
-namespace Nixill.CalcLib.Operatorsv2 {
+namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Provides a set of eight <c>CLComparisonOperator</c>s that share a
   ///   common function.

@@ -93,7 +93,7 @@ namespace Nixill.CalcLib.Parsing {
           if (prefix && postfix) throw new CLSyntaxException("A value was expected between brackets.", pos);
 
           // There might be multiple operators in a row, so let's be sure to get them all.
-          List<CLObjectPiece> pcs = CLOperator.GetOpers(opers, prefix, postfix, pos);
+          List<CLObjectPiece> pcs = CLOperators.GetOpers(opers, prefix, postfix, pos);
           ret.AddRange(pcs);
 
           last = match.Value;

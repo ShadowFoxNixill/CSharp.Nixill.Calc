@@ -7,7 +7,7 @@ using Nixill.CalcLib.Parsing;
 using Nixill.CalcLib.Varaibles;
 using Nixill.Utils;
 
-namespace Nixill.CalcLib.Operatorsv2 {
+namespace Nixill.CalcLib.Operators {
   public static class CLOperators {
     private static HashSet<int> FromRightOperators = new HashSet<int>();
 
