@@ -26,7 +26,7 @@ namespace Nixill.CalcLib.Parsing {
     private static Regex rgxNumber = new Regex(@"^(0|[1-9]\d*)(\.\d+)?");
     private static Regex rgxSeparator = new Regex(@"^[\(\)\[\]\,\}]");
     private static Regex rgxComment = new Regex(@"^\{\%[^\}]*}");
-    private static Regex rgxName = new Regex(@"^\{([\$\_\^\!]?[a-zA-Z]([a-zA-Z\_\-0-9]*[a-zA-Z0-9])?|\d+)");
+    private static Regex rgxName = new Regex(@"^\{([\$_\^\!]?[a-zA-Z]([a-zA-Z_\-0-9]*[a-zA-Z0-9])?|\d+)");
     private static Regex rgxString = new Regex(@"^\""([^\\\""]|\\[^A-Za-z0-9])*\""");
     private static Regex rgxOperator = new Regex(@"^[a-z\<\>\/\?\|\~\!\#\$\%\^\&\*\-\=\+ `\t\n]+");
 
@@ -56,7 +56,7 @@ namespace Nixill.CalcLib.Parsing {
         // Is it a separator?
         else if (CLUtils.RegexMatches(rgxSeparator, input, out match)) {
           last = match.Value;
-          ret.Add(new CLObjectPiece(last, CLObjectPieceType.Number, pos));
+          ret.Add(new CLObjectPiece(last, CLObjectPieceType.Spacer, pos));
           move = match.Length;
         }
 
@@ -79,7 +79,7 @@ namespace Nixill.CalcLib.Parsing {
           move = match.Length;
 
           string next = "";
-          if (input.Length > move) next = input.Substring(move, move + 1);
+          if (input.Length > move) next = input.Substring(move, 1);
 
           // If the operator immediately follows a separator,
           //   it must be a prefix operator.
@@ -101,6 +101,10 @@ namespace Nixill.CalcLib.Parsing {
 
         // No match? That's a paddlin.
         else throw new CLSyntaxException("I don't know what this means.", pos);
+
+        // Discard what we've found.
+        input = input.Substring(move);
+        pos += move;
       }
 
       return ret;

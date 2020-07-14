@@ -73,7 +73,7 @@ namespace Nixill.CalcLib.Parsing {
         else if (piece.Type == CLObjectPieceType.String) {
           if (!valueLast) {
             // Strip the quotes
-            string check = piece.Contents.Substring(1, piece.Contents.Length - 1);
+            string check = piece.Contents.Substring(1, piece.Contents.Length - 2);
             // Parse special characters
             check = check.Replace(@"\\", "\uF000")
                 .Replace(@"\n", "\n")

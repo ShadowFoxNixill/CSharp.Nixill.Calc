@@ -9,7 +9,7 @@ namespace Nixill.CalcLib.Objects {
     ///   variables.</param>
     /// <param name="context">The object representing the context in which
     ///   the expression is being evaluated.</param>
-    public abstract CalcValue GetValue(CLLocalStore store, object context = null);
+    public abstract CalcValue GetValue(CLLocalStore store = null, object context = null);
 
     /// <summary>
     /// Returns whether two <c>CalcObject</c>s are the same.
@@ -58,13 +58,13 @@ namespace Nixill.CalcLib.Objects {
     /// </summary>
     /// <param name="left">The left <c>CalcObject</c>.</param>
     /// <param name="right">The right <c>CalcObject</c>.</param>
-    public static bool operator ==(CalcObject left, CalcObject right) => left.Equals(right);
+    public static bool operator ==(CalcObject left, CalcObject right) => object.Equals(left, right);
 
     /// <summary>
     /// Returns whether two <c>CalcObject</c>s are inequal.
     /// </summary>
     /// <param name="left">The left <c>CalcObject</c>.</param>
     /// <param name="right">The right <c>CalcObject</c>.</param>
-    public static bool operator !=(CalcObject left, CalcObject right) => !(left.Equals(right));
+    public static bool operator !=(CalcObject left, CalcObject right) => !object.Equals(left, right);
   }
 }

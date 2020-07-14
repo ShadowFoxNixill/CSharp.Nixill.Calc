@@ -146,9 +146,10 @@ namespace Nixill.CalcLib.Operators {
     private static string KeysToPattern(string[] keys) {
       string ret = "";
       foreach (string key in keys) {
-        ret += "|" + rgxSymbol.Replace(key, @"\\$1");
+        ret += "|" + rgxSymbol.Replace(key, @"\$1");
       }
-      return "(" + ret.Substring(1) + ")";
+      if (ret == "") return "()";
+      else return "(" + ret.Substring(1) + ")";
     }
 
     // Initializes regexes with the existing keys
@@ -185,7 +186,10 @@ namespace Nixill.CalcLib.Operators {
   }
 
   public abstract class CLOperator {
-    internal CLOperator() {
+    internal CLOperator(string symbol, int priority) {
+      Priority = priority;
+      Symbol = symbol;
+
       if (this is CLBinaryOperator bin) CLOperators.BinaryOperators[bin.Symbol] = bin;
       if (this is CLPrefixOperator pre) CLOperators.PrefixOperators[pre.Symbol] = pre;
       if (this is CLPostfixOperator post) CLOperators.PostfixOperators[post.Symbol] = post;
@@ -229,7 +233,7 @@ namespace Nixill.CalcLib.Operators {
         for (; left != typeof(object); left = left.BaseType) {
           if (Functions.ContainsKey(left)) {
             for (Type r = right; r != typeof(object); r = r.BaseType) {
-              if (Functions.ContainsKey(right)) return Functions[left][right];
+              if (Functions[left].ContainsKey(r)) return Functions[left][r];
             }
           }
         }
@@ -249,9 +253,7 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="valRight">
     /// Whether or not the operator is value-based on its right side.
     /// </param>
-    public CLBinaryOperator(string symbol, int priority, bool valLeft, bool valRight) {
-      Symbol = symbol;
-      Priority = priority;
+    public CLBinaryOperator(string symbol, int priority, bool valLeft, bool valRight) : base(symbol, priority) {
       ValueBasedLeft = valLeft;
       ValueBasedRight = valRight;
     }
@@ -305,7 +307,7 @@ namespace Nixill.CalcLib.Operators {
       if (replaceChildren) {
         foreach (Type leftTest in Functions.Keys) {
           if (leftTest.IsSubclassOf(left) || leftTest == left) {
-            foreach (Type rightTest in Functions[left].Keys) {
+            foreach (Type rightTest in Functions[leftTest].Keys) {
               if (rightTest.IsSubclassOf(right) || (rightTest == right && leftTest != left)) {
                 Functions[left].Remove(right);
               }
@@ -356,9 +358,7 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="valBased">
     /// Whether or not the operator is value-based.
     /// </param>
-    public CLUnaryOperator(string symbol, int priority, bool isPrefix, bool valBased) {
-      Symbol = symbol;
-      Priority = priority;
+    public CLUnaryOperator(string symbol, int priority, bool isPrefix, bool valBased) : base(symbol, priority) {
       IsPrefix = isPrefix;
       ValueBased = valBased;
     }

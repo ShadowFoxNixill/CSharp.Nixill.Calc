@@ -37,7 +37,7 @@ namespace Nixill.CalcLib.Objects {
     ///   variables.</param>
     /// <param name="context">The object representing the context in which
     ///   the expression is being evaluated.</param>
-    public abstract override CalcValue GetValue(CLLocalStore vars, object context = null);
+    public abstract override CalcValue GetValue(CLLocalStore vars = null, object context = null);
   }
 
   /// <summary>
@@ -73,8 +73,10 @@ namespace Nixill.CalcLib.Objects {
       Params = pars;
     }
 
-    public override CalcValue GetValue(CLLocalStore vars, object context = null) =>
-      Function.FunctionDef.Invoke(Params, context, vars);
+    public override CalcValue GetValue(CLLocalStore vars = null, object context = null) {
+      vars = vars ?? new CLLocalStore();
+      return Function.FunctionDef.Invoke(Params, context, vars);
+    }
 
     public override string ToCode() {
       string ret = "{!" + Function.Name;
@@ -139,7 +141,9 @@ namespace Nixill.CalcLib.Objects {
       }
     }
 
-    public override CalcValue GetValue(CLLocalStore vars, object context = null) {
+    public override CalcValue GetValue(CLLocalStore vars = null, object context = null) {
+      vars = vars ?? new CLLocalStore();
+
       CalcValue[] ret = new CalcValue[_list.Length];
 
       for (int i = 0; i < _list.Length; i++) {
@@ -252,7 +256,9 @@ namespace Nixill.CalcLib.Objects {
       throw new CLException("No variable named " + Name + " exists.");
     }
 
-    public override CalcValue GetValue(CLLocalStore vars, object context = null) {
+    public override CalcValue GetValue(CLLocalStore vars = null, object context = null) {
+      vars = vars ?? new CLLocalStore();
+
       CalcObject obj = GetObject(vars, context);
       return obj.GetValue(vars);
     }
@@ -330,7 +336,9 @@ namespace Nixill.CalcLib.Objects {
       return "(" + left + Operator.Symbol + right + ")";
     }
 
-    public override CalcValue GetValue(CLLocalStore vars, object context = null) {
+    public override CalcValue GetValue(CLLocalStore vars = null, object context = null) {
+      vars = vars ?? new CLLocalStore();
+
       if (Operator is CLBinaryOperator bin) return bin.Run(Left, Right, vars, context);
       else if (Operator is CLPrefixOperator pre) return pre.Run(Right, vars, context);
       else if (Operator is CLPostfixOperator post) return post.Run(Left, vars, context);

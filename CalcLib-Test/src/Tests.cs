@@ -1,0 +1,56 @@
+using NUnit.Framework;
+
+using Nixill.CalcLib.Modules;
+using Nixill.CalcLib.Parsing;
+using Nixill.CalcLib.Objects;
+using Nixill.CalcLib.Varaibles;
+
+namespace Nixill.Test {
+  public class CalcLibTests {
+    [Test]
+    public void TestV1() {
+      MainModule.Load();
+
+      // The first tests
+      TestLine("3");
+      TestLine("4+2");
+      TestLine("3/-2");
+      TestLine("2*(-1+5)");
+      TestLine("2+[1,2,3]");
+      TestLine("[1,(1+1),(1-1)]");
+    }
+
+    public void TestLine(string input, bool resolve = true) {
+      // First, let's parse it
+      CalcObject obj1 = CLInterpreter.Interpret(input);
+
+      // And put it back to string and back
+      string code2 = obj1.ToCode();
+      CalcObject obj3 = CLInterpreter.Interpret(code2);
+      string code4 = obj3.ToCode();
+
+      // code2 and code4 need to match
+      Assert.AreEqual(code2, code4, "code2 and code4 don't match on line: " + input);
+
+      // We'll stop here if we're testing non-deterministic functions
+      if (!resolve) return;
+
+      // Then, let's get the value
+      CalcValue val5 = obj1.GetValue();
+      string code6 = val5.ToCode();
+      CalcObject obj7 = CLInterpreter.Interpret(code6);
+      string code8 = obj7.ToCode();
+      CalcValue val9 = obj7.GetValue();
+
+      // code6 and code8 need to match
+      Assert.AreEqual(code6, code8, "code6 and code8 don't match on line: " + input);
+
+      // val5 and val9 also need to match
+      Assert.AreEqual(val5, val9, "val5 and val9 don't match on line: " + input);
+    }
+  }
+
+  public class Loader {
+
+  }
+}
