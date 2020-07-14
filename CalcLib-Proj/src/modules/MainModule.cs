@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Objects;
@@ -21,7 +22,7 @@ namespace Nixill.CalcLib.Modules {
     public static CLPrefixOperator PrefixMinus { get; private set; }
 
     public static void Load() {
-      // First we need some local calcvalues
+      // First we need some local types
       Type num = typeof(CalcNumber);
       Type lst = typeof(CalcList);
       Type str = typeof(CalcString);
@@ -29,7 +30,6 @@ namespace Nixill.CalcLib.Modules {
 
       // The binary + operator
       BinaryPlus = CLOperators.BinaryOperators.GetOrNull("+") ?? new CLBinaryOperator("+", PlusPriority, true, true);
-
       BinaryPlus.AddFunction(num, num, BinPlusNumbers);
       BinaryPlus.AddFunction(num, str, (left, right, vars, context) => BinPlusStrings(NumToString(left), right, vars, context));
       BinaryPlus.AddFunction(str, num, (left, right, vars, context) => BinPlusStrings(left, NumToString(right), vars, context));
@@ -40,24 +40,43 @@ namespace Nixill.CalcLib.Modules {
 
       // The binary - operator
       BinaryMinus = CLOperators.BinaryOperators.GetOrNull("-") ?? new CLBinaryOperator("-", PlusPriority, true, true);
-
       BinaryMinus.AddFunction(val, val, BinMinus);
 
       // The binary * operator
       BinaryTimes = CLOperators.BinaryOperators.GetOrNull("*") ?? new CLBinaryOperator("*", TimesPriority, true, true);
-
       BinaryTimes.AddFunction(num, num, BinTimesNumbers);
-      BinaryTimes.AddFunction(num, lst, (left, right, vars, context) => BinTimesNumList(right, left, vars, context));
-      BinaryTimes.AddFunction(num, str, (left, right, vars, context) => BinTimesNumString(right, left, vars, context));
-      BinaryTimes.AddFunction(lst, lst, (left, right, vars, context) => BinTimesNumList(left, ListToNum(right), vars, context));
-      BinaryTimes.AddFunction(lst, num, BinTimesNumList);
-      BinaryTimes.AddFunction(str, num, BinTimesNumString);
+      BinaryTimes.AddFunction(num, lst, (left, right, vars, context) => BinTimesList(right, left, vars, context));
+      BinaryTimes.AddFunction(num, str, (left, right, vars, context) => BinTimesString(right, left, vars, context));
+      BinaryTimes.AddFunction(lst, lst, (left, right, vars, context) => BinTimesList(left, ListToNum(right), vars, context));
+      BinaryTimes.AddFunction(lst, num, BinTimesList);
+      BinaryTimes.AddFunction(str, num, BinTimesString);
 
+      // The binary / operator
       BinaryDivide = CLOperators.BinaryOperators.GetOrNull("/") ?? new CLBinaryOperator("/", TimesPriority, true, true);
+      BinaryDivide.AddFunction(num, num, BinDivideNumbers);
+      BinaryDivide.AddFunction(num, lst, (left, right, vars, context) => BinDivideList(right, left, vars, context));
+      BinaryDivide.AddFunction(lst, num, BinDivideList);
+      BinaryDivide.AddFunction(lst, lst, (left, right, vars, context) => BinDivideList(left, ListToNum(right), vars, context));
+      BinaryDivide.AddFunction(str, num, BinDivideStringException);
+      BinaryDivide.AddFunction(num, str, BinDivideStringException);
+
+      // The binary // operator
       BinaryIntDivide = CLOperators.BinaryOperators.GetOrNull("//") ?? new CLBinaryOperator("//", TimesPriority, true, true);
+      BinaryIntDivide.AddFunction(num, num, BinIntDivideNumbers);
+      BinaryIntDivide.AddFunction(lst, num, (left, right, vars, context) => BinIntDivideNumbers(ListToNum(left), right, vars, context));
+      BinaryIntDivide.AddFunction(num, lst, (left, right, vars, context) => BinIntDivideNumbers(left, ListToNum(right), vars, context));
+      BinaryIntDivide.AddFunction(lst, lst, (left, right, vars, context) => BinIntDivideNumbers(ListToNum(left), ListToNum(right), vars, context));
+
       BinaryModulo = CLOperators.BinaryOperators.GetOrNull("%") ?? new CLBinaryOperator("%", TimesPriority, true, true);
+      BinaryModulo.AddFunction(num, num, BinModuloNumbers);
+      BinaryModulo.AddFunction(lst, num, (left, right, vars, context) => BinModuloNumbers(ListToNum(left), right, vars, context));
+      BinaryModulo.AddFunction(num, lst, (left, right, vars, context) => BinModuloNumbers(left, ListToNum(right), vars, context));
+      BinaryModulo.AddFunction(lst, lst, (left, right, vars, context) => BinModuloNumbers(ListToNum(left), ListToNum(right), vars, context));
 
       PrefixMinus = CLOperators.PrefixOperators.GetOrNull("-") ?? new CLPrefixOperator("-", PlusPriority, true);
+      PrefixMinus.AddFunction(num, PreMinusNumber);
+      PrefixMinus.AddFunction(lst, PreMinusList);
+      PrefixMinus.AddFunction(str, PreMinusString);
     }
 
     // Converts a number to a string.
@@ -110,16 +129,13 @@ namespace Nixill.CalcLib.Modules {
     #region // BIN - FUNCTION //
     // Subtracts one value from another.
     private static CalcValue BinMinus(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
-      CLBinaryOperator binPlus = CLOperators.BinaryOperators["+"];
-      CLPrefixOperator preMinus = CLOperators.PrefixOperators["-"];
-
-      binPlus.Run(left, preMinus.Run(right, vars, context), vars, context);
+      return BinaryPlus.Run(left, PrefixMinus.Run(right, vars, context), vars, context);
     }
     #endregion
 
     #region // BIN * FUNCTIONS //
     // Multiples two numbers and returns their product.
-    private CalcValue BinTimesNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinTimesNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
       CalcNumber numLeft = left as CalcNumber;
       CalcNumber numRight = right as CalcNumber;
 
@@ -127,7 +143,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Multiplies a list by a number.
-    private CalcValue BinTimesNumList(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinTimesList(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
       CalcList lstLeft = left as CalcList;
       CalcNumber numRight = right as CalcNumber;
 
@@ -155,6 +171,104 @@ namespace Nixill.CalcLib.Modules {
         }
         return new CalcList(lstRet);
       }
+    }
+
+    // Multiplies a string by a number.
+    private static CalcValue BinTimesString(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+      CalcString strLeft = left as CalcString;
+      CalcNumber numRight = right as CalcNumber;
+
+      int count = (int)numRight;
+      if (count < 0) throw new CLException("Strings cannot be repeated negative times.");
+
+      string strRet = "";
+
+      for (int i = 0; i < count; i++) {
+        strRet += strLeft;
+      }
+
+      return new CalcString(strRet);
+    }
+    #endregion
+
+    #region // BIN / FUNCTIONS //
+    // Returns the quotient of two numbers.
+    private static CalcValue BinDivideNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+      CalcNumber numLeft = left as CalcNumber;
+      CalcNumber numRight = right as CalcNumber;
+
+      return new CalcNumber(numLeft / numRight);
+    }
+
+    // Returns the quotient of a list's items over a number.
+    private static CalcValue BinDivideList(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+      CalcList lstLeft = left as CalcList;
+      CalcNumber numRight = right as CalcNumber;
+
+      // We will *not* do string checking here
+      // It's entirely possible someone writes a string divider and this function will use it.
+
+      CalcValue[] lstRet = new CalcValue[lstLeft.Count];
+
+      for (int i = 0; i < lstRet.Length; i++) {
+        lstRet[i] = BinaryDivide.Run(lstLeft[i], numRight, vars, context);
+      }
+
+      return new CalcList(lstRet);
+    }
+
+    // Throws an exception, but exists. Can be overloaded by other modules.
+    private static CalcValue BinDivideStringException(CalcObject left, CalcObject right, CLLocalStore vars, object context) =>
+      throw new CLException("Strings cannot be divided by numbers.");
+    #endregion
+
+    #region // BIN // % FUNCTIONS //
+    // Returns the quotient, without remainder, of two numbers.
+    private static CalcValue BinIntDivideNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+      CalcNumber numLeft = left as CalcNumber;
+      CalcNumber numRight = right as CalcNumber;
+
+      return new CalcNumber(decimal.Floor(numLeft / numRight));
+    }
+
+    // Returns the quotient, without remainder, of two numbers.
+    private static CalcValue BinModuloNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+      CalcNumber numLeft = left as CalcNumber;
+      CalcNumber numRight = right as CalcNumber;
+
+      return new CalcNumber(numLeft % numRight);
+    }
+    #endregion
+
+    #region // PREFIX - FUNCTIONS //
+    // Returns the number, negated.
+    private static CalcValue PreMinusNumber(CalcObject param, CLLocalStore vars, object context) {
+      CalcNumber numParam = param as CalcNumber;
+
+      return new CalcNumber(-numParam);
+    }
+
+    // Returns the string, reversed.
+    private static CalcValue PreMinusString(CalcObject param, CLLocalStore vars, object context) {
+      CalcString strParam = param as CalcString;
+
+      char[] chars = strParam.Value.ToCharArray();
+      Array.Reverse(chars);
+
+      return new CalcString(new string(chars));
+    }
+
+    // Returns the list, with all its elements negated.
+    private static CalcValue PreMinusList(CalcObject param, CLLocalStore vars, object context) {
+      CalcList lstParam = param as CalcList;
+
+      CalcValue[] lstRet = new CalcValue[lstParam.Count];
+
+      for (int i = 0; i < lstRet.Length; i++) {
+        lstRet[i] = PrefixMinus.Run(lstParam[i], vars, context);
+      }
+
+      return new CalcList(lstRet);
     }
     #endregion
   }
