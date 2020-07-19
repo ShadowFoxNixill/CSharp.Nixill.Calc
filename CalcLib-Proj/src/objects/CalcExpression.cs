@@ -241,8 +241,8 @@ namespace Nixill.CalcLib.Objects {
 
       int count = 0;
       if (Int32.TryParse(Name, out count)) {
-        if (vars.VarCount > count) return vars[count];
-        else if (Params.Length > 0) return Params[1];
+        if (vars.ParamCount > count) return vars[count];
+        else if (Params.Length > 0) return Params[0];
         else throw new CLException("No parameter #" + count + " exists.");
       }
 
@@ -260,6 +260,9 @@ namespace Nixill.CalcLib.Objects {
       vars = vars ?? new CLLocalStore();
 
       CalcObject obj = GetObject(vars, context);
+
+      vars = new CLLocalStore(Params);
+
       return obj.GetValue(vars);
     }
 

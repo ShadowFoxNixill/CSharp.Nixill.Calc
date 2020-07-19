@@ -18,6 +18,14 @@ namespace Nixill.Test {
       TestLine("2*(-1+5)");
       TestLine("2+[1,2,3]");
       TestLine("[1,(1+1),(1-1)]");
+
+      // More tests
+      CLVariables.VariableLoaded += Loader.Load;
+      TestLine("2^5");
+      TestLine("{two}^{four}");
+      TestLine("{level,3}");
+      TestLine("{level,10}");
+      TestLine("{level}");
     }
 
     public void TestLine(string input, bool resolve = true) {
@@ -51,6 +59,16 @@ namespace Nixill.Test {
   }
 
   public class Loader {
+    private static CalcObject Level = CLInterpreter.Interpret("({0,5}^2+{0,5})/2");
+    private static CalcObject Four = new CalcNumber(4);
+    private static CalcObject Two = new CalcNumber(2);
 
+    public static void Load(object sender, CLVariableLoad args) {
+      string name = args.Name;
+
+      if (name == "level") args.Value = Level;
+      if (name == "four") args.Value = Four;
+      if (name == "two") args.Value = Two;
+    }
   }
 }

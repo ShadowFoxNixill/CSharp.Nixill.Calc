@@ -18,6 +18,7 @@ namespace Nixill.CalcLib.Modules {
     public static CLBinaryOperator BinaryDivide { get; private set; }
     public static CLBinaryOperator BinaryIntDivide { get; private set; }
     public static CLBinaryOperator BinaryModulo { get; private set; }
+    public static CLBinaryOperator BinaryPower { get; private set; }
 
     public static CLPrefixOperator PrefixMinus { get; private set; }
 
@@ -67,11 +68,19 @@ namespace Nixill.CalcLib.Modules {
       BinaryIntDivide.AddFunction(num, lst, (left, right, vars, context) => BinIntDivideNumbers(left, ListToNum(right), vars, context));
       BinaryIntDivide.AddFunction(lst, lst, (left, right, vars, context) => BinIntDivideNumbers(ListToNum(left), ListToNum(right), vars, context));
 
+      // The binary % operator
       BinaryModulo = CLOperators.BinaryOperators.GetOrNull("%") ?? new CLBinaryOperator("%", TimesPriority, true, true);
       BinaryModulo.AddFunction(num, num, BinModuloNumbers);
       BinaryModulo.AddFunction(lst, num, (left, right, vars, context) => BinModuloNumbers(ListToNum(left), right, vars, context));
       BinaryModulo.AddFunction(num, lst, (left, right, vars, context) => BinModuloNumbers(left, ListToNum(right), vars, context));
       BinaryModulo.AddFunction(lst, lst, (left, right, vars, context) => BinModuloNumbers(ListToNum(left), ListToNum(right), vars, context));
+
+      // The binary ^ operator
+      BinaryPower = CLOperators.BinaryOperators.GetOrNull("^") ?? new CLBinaryOperator("^", TimesPriority, true, true);
+      BinaryPower.AddFunction(num, num, BinPowerNumbers);
+      BinaryPower.AddFunction(lst, num, (left, right, vars, context) => BinPowerNumbers(ListToNum(left), right, vars, context));
+      BinaryPower.AddFunction(num, lst, (left, right, vars, context) => BinPowerNumbers(left, ListToNum(right), vars, context));
+      BinaryPower.AddFunction(lst, lst, (left, right, vars, context) => BinPowerNumbers(ListToNum(left), ListToNum(right), vars, context));
 
       PrefixMinus = CLOperators.PrefixOperators.GetOrNull("-") ?? new CLPrefixOperator("-", PlusPriority, true);
       PrefixMinus.AddFunction(num, PreMinusNumber);
@@ -222,7 +231,7 @@ namespace Nixill.CalcLib.Modules {
       throw new CLException("Strings cannot be divided by numbers.");
     #endregion
 
-    #region // BIN // % FUNCTIONS //
+    #region // BIN // % ^ FUNCTIONS //
     // Returns the quotient, without remainder, of two numbers.
     private static CalcValue BinIntDivideNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
       CalcNumber numLeft = left as CalcNumber;
@@ -237,6 +246,14 @@ namespace Nixill.CalcLib.Modules {
       CalcNumber numRight = right as CalcNumber;
 
       return new CalcNumber(numLeft % numRight);
+    }
+
+    // Returns the left raised to the power of the right.
+    private static CalcValue BinPowerNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+      CalcNumber numLeft = left as CalcNumber;
+      CalcNumber numRight = right as CalcNumber;
+
+      return new CalcNumber((decimal)Math.Pow((double)(numLeft.Value), (double)(numRight.Value)));
     }
     #endregion
 
