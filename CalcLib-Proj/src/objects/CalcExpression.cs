@@ -75,7 +75,7 @@ namespace Nixill.CalcLib.Objects {
 
     public override CalcValue GetValue(CLLocalStore vars = null, object context = null) {
       vars = vars ?? new CLLocalStore();
-      return Function.FunctionDef.Invoke(Params, context, vars);
+      return Function.FunctionDef.Invoke(Params, vars, context);
     }
 
     public override string ToCode() {
@@ -214,7 +214,7 @@ namespace Nixill.CalcLib.Objects {
     /// <param name="name">The name of the function to call.</param>
     /// <param name="pars">The parameters for the called function.</param>
     public CalcFunction(string name, CalcObject[] pars) {
-      Name = name;
+      Name = name.ToLower();
       Params = pars;
     }
 
@@ -241,7 +241,8 @@ namespace Nixill.CalcLib.Objects {
 
       int count = 0;
       if (Int32.TryParse(Name, out count)) {
-        if (vars.ParamCount > count) return vars[count];
+        if (count == 0) return new CalcString(Name);
+        if (vars.ParamCount >= count) return vars[count - 1];
         else if (Params.Length > 0) return Params[0];
         else throw new CLException("No parameter #" + count + " exists.");
       }

@@ -4,6 +4,7 @@ using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Operators;
 using Nixill.CalcLib.Varaibles;
+using static Nixill.CalcLib.Modules.Casting;
 
 namespace Nixill.CalcLib.Modules {
   public class MainModule {
@@ -87,15 +88,6 @@ namespace Nixill.CalcLib.Modules {
       PrefixMinus.AddFunction(lst, PreMinusList);
       PrefixMinus.AddFunction(str, PreMinusString);
     }
-
-    // Converts a number to a string.
-    private static CalcString NumToString(CalcObject num) => new CalcString((num as CalcNumber).Value.ToString("0.#####"));
-
-    // Converts a value to a list.
-    private static CalcList ValToList(CalcObject val) => new CalcList(new CalcValue[] { (val as CalcValue) });
-
-    // Converts a list to a number.
-    private static CalcNumber ListToNum(CalcObject lst) => new CalcNumber((lst as CalcList).Sum());
 
     #region // BIN + FUNCTIONS //
     // Adds two numbers.

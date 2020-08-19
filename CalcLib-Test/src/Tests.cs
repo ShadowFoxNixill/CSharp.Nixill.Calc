@@ -59,7 +59,7 @@ namespace Nixill.Test {
   }
 
   public class Loader {
-    private static CalcObject Level = CLInterpreter.Interpret("({0,5}^2+{0,5})/2");
+    private static CalcObject Level = CLInterpreter.Interpret("({1,5}^2+{1,5})/2");
     private static CalcObject Four = new CalcNumber(4);
     private static CalcObject Two = new CalcNumber(2);
 
