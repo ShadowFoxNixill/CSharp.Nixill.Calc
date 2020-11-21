@@ -18,6 +18,6 @@ namespace Nixill.CalcLib.Exception {
     /// <param name="basex">The exception that caused this
     ///   <c>CalcException</c>.</param>
     /// <param name="message">The message to be displayed.</param>
-    public CLException(SystemException basex, string message = "") : base(message, basex) { }
+    public CLException(System.Exception basex, string message = "") : base(message, basex) { }
   }
 }
