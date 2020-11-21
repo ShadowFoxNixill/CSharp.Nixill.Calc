@@ -29,6 +29,7 @@ namespace Nixill.CalcLib.Modules {
     public static CLCodeFunction Cos { get; private set; }
     public static CLCodeFunction Cosh { get; private set; }
     public static CLCodeFunction Floor { get; private set; }
+    public static CLCodeFunction Log { get; private set; }
     public static CLCodeFunction Max { get; private set; }
     public static CLCodeFunction MaxMagnitude { get; private set; }
     public static CLCodeFunction Min { get; private set; }
@@ -77,6 +78,7 @@ namespace Nixill.CalcLib.Modules {
       Ceiling = new CLCodeFunction("ceiling", CeilingFunction);
       CopySign = new CLCodeFunction("copysign", CopySignFunction);
       Floor = new CLCodeFunction("floor", FloorFunction);
+      Log = new CLCodeFunction("log", LogFunction);
       Max = new CLCodeFunction("max", MaxFunction);
       MaxMagnitude = new CLCodeFunction("maxmagnitude", MaxMagnitudeFunction);
       Min = new CLCodeFunction("min", MinFunction);
@@ -224,10 +226,18 @@ namespace Nixill.CalcLib.Modules {
 
     // Returns the largest integral value less than or equal to the parameter. (Rounds towards -∞)
     private static CalcValue FloorFunction(CalcObject[] pars, CLLocalStore vars, object context) {
-      if (pars.Length == 0) throw new CLException("{!floor} requires as number.");
+      if (pars.Length == 0) throw new CLException("{!floor} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!floor", vars, context);
       return new CalcNumber(Math.Floor(num));
+    }
+
+    // Returns the natural logarithm of the parameter.
+    private static CalcValue LogFunction(CalcObject[] pars, CLLocalStore vars, object context) {
+      if (pars.Length == 0) throw new CLException("{!log} requires a number.");
+
+      CalcNumber num = NumberAt(pars, 0, "!floor", vars, context);
+      return new CalcNumber((decimal)Math.Log((double)num.Value));
     }
 
     // Returns the maximum value out of the list.
@@ -291,7 +301,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     private static CalcValue SignFunction(CalcObject[] pars, CLLocalStore vars, object context) {
-      if (pars.Length == 0) throw new CLException("{!sign} requires as number.");
+      if (pars.Length == 0) throw new CLException("{!sign} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!sign", vars, context);
       return new CalcNumber(Math.Sign(num));

@@ -26,6 +26,12 @@ namespace Nixill.Test {
       TestLine("{level,3}");
       TestLine("{level,10}");
       TestLine("{level}");
+
+      // Math module tests
+      MathModule.Load();
+      TestLine("{!abs,-4}");
+      TestLine("{!sin,1}");
+      TestLine("{!max,2,-3}");
     }
 
     public void TestLine(string input, bool resolve = true) {
