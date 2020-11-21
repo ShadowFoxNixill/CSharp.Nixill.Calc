@@ -244,17 +244,57 @@ namespace Nixill.CalcLib.Modules {
       return new CalcNumber(max);
     }
 
+    // Returns the maximum value out of the list.
     private static CalcValue MaxMagnitudeFunction(CalcObject[] pars, CLLocalStore vars, object context) {
+      if (pars.Length == 0) throw new CLException("{!maxmagnitude} requires numbers.");
 
+      decimal max = (decimal)0;
+
+      for (int i = 0; i < pars.Length; i++) {
+        CalcNumber num = NumberAt(pars, i, "!maxmagnitude", vars, context);
+        if (Math.Abs(num.Value) > max) {
+          max = num;
+        }
+      }
+
+      return new CalcNumber(max);
     }
+
+    // Returns the minimum value out of the list.
     private static CalcValue MinFunction(CalcObject[] pars, CLLocalStore vars, object context) {
+      if (pars.Length == 0) throw new CLException("{!min} requires numbers.");
 
+      decimal min = Decimal.MaxValue;
+
+      for (int i = 0; i < pars.Length; i++) {
+        CalcNumber num = NumberAt(pars, i, "!min", vars, context);
+        min = Math.Min(min, num.Value);
+      }
+
+      return new CalcNumber(min);
     }
+
+    // Returns the minimum value out of the list.
     private static CalcValue MinMagnitudeFunction(CalcObject[] pars, CLLocalStore vars, object context) {
+      if (pars.Length == 0) throw new CLException("{!minmagnitude} requires numbers.");
 
+      decimal min = (decimal)Decimal.MinValue;
+
+      for (int i = 0; i < pars.Length; i++) {
+        CalcNumber num = NumberAt(pars, i, "!minmagnitude", vars, context);
+        if (Math.Abs(num.Value) < min) {
+          min = num;
+        }
+      }
+
+      return new CalcNumber(min);
     }
-    private static CalcValue SignFunction(CalcObject[] pars, CLLocalStore vars, object context) {
 
+    private static CalcValue SignFunction(CalcObject[] pars, CLLocalStore vars, object context) {
+      if (pars.Length == 0) throw new CLException("{!sign} requires as number.");
+
+      CalcNumber num = NumberAt(pars, 0, "!sign", vars, context);
+      return new CalcNumber(Math.Sign(num));
     }
   }
 }
