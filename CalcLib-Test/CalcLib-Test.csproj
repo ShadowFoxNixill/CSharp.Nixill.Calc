@@ -1,14 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageId>CalcLib</PackageId>
-    <Version>$(RELEASE_VERSION)</Version>
-    <Authors>Nixill</Authors>
-    <PackageDescription>A basic calculation parser.</PackageDescription>
-    <RepositoryUrl>https://github.com/ShadowFoxNixill/CalcLib</RepositoryUrl>
-    <RootNamespace>Nixill</RootNamespace>
+    <RootNamespace>CalcLib_Test</RootNamespace>
+
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
