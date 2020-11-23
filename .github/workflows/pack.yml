@@ -36,8 +36,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./CalcLib-Proj/out/CalcLib-Proj.${{ github.event.release.tag_name }}.nupkg
-          asset_name: CalcLib-Proj.${{ github.event.release.tag_name }}.nupkg
+          asset_path: ./CalcLib-Proj/out/CalcLib.${{ github.event.release.tag_name }}.nupkg
+          asset_name: CalcLib.${{ github.event.release.tag_name }}.nupkg
           asset_content_type: application/zip
       - name: Push to github packages
         run: |
