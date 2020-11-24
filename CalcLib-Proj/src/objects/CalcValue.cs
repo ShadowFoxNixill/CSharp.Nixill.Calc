@@ -9,7 +9,7 @@ namespace Nixill.CalcLib.Objects {
   /// Represents a resolved value.
   /// </summary>
   public abstract class CalcValue : CalcObject {
-    public sealed override CalcValue GetValue(CLLocalStore vars, object context = null) => this;
+    public sealed override CalcValue GetValue(CLLocalStore vars, CLContextProvider context = null) => this;
   }
 
   /// <summary>

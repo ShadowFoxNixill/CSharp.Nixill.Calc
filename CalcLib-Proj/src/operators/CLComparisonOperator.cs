@@ -107,7 +107,7 @@ namespace Nixill.CalcLib.Operators {
     }
   }
 
-  public delegate CalcValue CLComparisonFunc(CalcObject left, CLComparison comp, CalcObject right, CLLocalStore vars, object context);
+  public delegate CalcValue CLComparisonFunc(CalcObject left, CLComparison comp, CalcObject right, CLLocalStore vars, CLContextProvider context);
 
   /// <summary>
   /// A single comparison, with its own symbol and comparison condition.

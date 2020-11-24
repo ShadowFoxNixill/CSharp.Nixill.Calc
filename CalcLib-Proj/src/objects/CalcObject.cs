@@ -9,7 +9,7 @@ namespace Nixill.CalcLib.Objects {
     ///   variables.</param>
     /// <param name="context">The object representing the context in which
     ///   the expression is being evaluated.</param>
-    public abstract CalcValue GetValue(CLLocalStore store = null, object context = null);
+    public abstract CalcValue GetValue(CLLocalStore store = null, CLContextProvider context = null);
 
     /// <summary>
     /// Returns whether two <c>CalcObject</c>s are the same.

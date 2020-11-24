@@ -263,7 +263,7 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="right">The right operand.</param>
     /// <param name="vars">The local variable storage.</param>
     /// <param name="context">An object representing context.</param>
-    public CalcValue Run(CalcObject left, CalcObject right, CLLocalStore vars = null, object context = null) {
+    public CalcValue Run(CalcObject left, CalcObject right, CLLocalStore vars = null, CLContextProvider context = null) {
       // If the operator is value-based, we'll automatically convert expressions.
       if (ValueBasedLeft) left = left.GetValue(vars, context);
       if (ValueBasedRight) right = right.GetValue(vars, context);
@@ -320,7 +320,7 @@ namespace Nixill.CalcLib.Operators {
     public override string ToString() => "bin:" + Symbol;
   }
 
-  public delegate CalcValue CLBinaryOperatorFunc(CalcObject left, CalcObject right, CLLocalStore vars, object context);
+  public delegate CalcValue CLBinaryOperatorFunc(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context);
 
   /// <summary>
   /// Represents a unary (one-operand) <c>CLOperator</c>.
@@ -367,7 +367,7 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="param">The right operand.</param>
     /// <param name="vars">The local variable storage.</param>
     /// <param name="context">An object representing context.</param>
-    public CalcValue Run(CalcObject param, CLLocalStore vars = null, object context = null) {
+    public CalcValue Run(CalcObject param, CLLocalStore vars = null, CLContextProvider context = null) {
       // If the operator is value-based, we'll automatically convert expressions.
       if (ValueBased) param = param.GetValue(vars, context);
 
@@ -408,7 +408,7 @@ namespace Nixill.CalcLib.Operators {
     public override string ToString() => "bin:" + Symbol;
   }
 
-  public delegate CalcValue CLUnaryOperatorFunc(CalcObject param, CLLocalStore vars, object context);
+  public delegate CalcValue CLUnaryOperatorFunc(CalcObject param, CLLocalStore vars, CLContextProvider context);
 
   /// <summary>
   /// Represents a prefix-based <c>CLUnaryOperator</c>.

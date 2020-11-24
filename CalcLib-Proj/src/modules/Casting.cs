@@ -14,9 +14,9 @@ namespace Nixill.CalcLib.Modules {
     internal static CalcNumber ListToNum(CalcObject lst) => new CalcNumber((lst as CalcList).Sum());
 
     // Gets the parameter at a given index in the params list as a number.
-    internal static CalcNumber NumberAt(CalcObject[] pars, int index, string name, CLLocalStore vars, object context) {
+    internal static CalcNumber NumberAt(CalcObject[] pars, int index, string name, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length <= index) throw new CLException(name + " parameter " + index + " was not specified.");
-      CalcValue val = pars[index].GetValue();
+      CalcValue val = pars[index].GetValue(vars, context);
       if (!(val is CalcNumber num)) throw new CLCastException(name + " parameter " + index + " must be a number.");
       return num;
     }

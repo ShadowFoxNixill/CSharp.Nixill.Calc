@@ -26,7 +26,7 @@ namespace Nixill.CalcLib.Varaibles {
     /// <param name="context">
     /// An object representing the context in which it's run.
     /// </param>
-    public static CalcObject Load(string name, object context) {
+    public static CalcObject Load(string name, CLContextProvider context) {
       CLVariableLoad data = new CLVariableLoad() {
         Name = name
       };
@@ -52,7 +52,7 @@ namespace Nixill.CalcLib.Varaibles {
     /// <param name="context">
     /// An object representing the context in which it's run.
     /// </param>
-    public static void Save(string name, CalcObject val, object context) {
+    public static void Save(string name, CalcObject val, CLContextProvider context) {
       CLVariableSave data = new CLVariableSave() {
         Name = name,
         Value = val

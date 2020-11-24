@@ -11,7 +11,7 @@ namespace Nixill.CalcLib.Functions {
     /// <summary>
     /// The function that runs whenever the code function is called.
     /// </summary>
-    public Func<CalcObject[], CLLocalStore, object, CalcValue> FunctionDef { get; private set; }
+    public Func<CalcObject[], CLLocalStore, CLContextProvider, CalcValue> FunctionDef { get; private set; }
     /// <summary>The name of the code function.</summary>
     public string Name { get; private set; }
 
@@ -36,7 +36,7 @@ namespace Nixill.CalcLib.Functions {
     ///   existing
     ///   <link cref="CalcCodeFunction"><c>CalcCodeFunction</c></link>s
     ///   will continue to reference the old <c>CLCodeFunction</c>.</para>
-    public CLCodeFunction(string name, Func<CalcObject[], CLLocalStore, object, CalcValue> funcDef) {
+    public CLCodeFunction(string name, Func<CalcObject[], CLLocalStore, CLContextProvider, CalcValue> funcDef) {
       Name = name;
       FunctionDef = funcDef;
 

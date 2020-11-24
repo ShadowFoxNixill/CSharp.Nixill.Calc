@@ -91,7 +91,7 @@ namespace Nixill.CalcLib.Modules {
 
     #region // BIN + FUNCTIONS //
     // Adds two numbers.
-    private static CalcValue BinPlusNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinPlusNumbers(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcNumber numLeft = left as CalcNumber;
       CalcNumber numRight = right as CalcNumber;
 
@@ -99,7 +99,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Concatenates two strings.
-    private static CalcValue BinPlusStrings(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinPlusStrings(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcString strLeft = left as CalcString;
       CalcString strRight = right as CalcString;
 
@@ -107,7 +107,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Concatenates two lists.
-    private static CalcValue BinPlusLists(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinPlusLists(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcList lstLeft = left as CalcList;
       CalcList lstRight = right as CalcList;
 
@@ -129,14 +129,14 @@ namespace Nixill.CalcLib.Modules {
 
     #region // BIN - FUNCTION //
     // Subtracts one value from another.
-    private static CalcValue BinMinus(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinMinus(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       return BinaryPlus.Run(left, PrefixMinus.Run(right, vars, context), vars, context);
     }
     #endregion
 
     #region // BIN * FUNCTIONS //
     // Multiples two numbers and returns their product.
-    private static CalcValue BinTimesNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinTimesNumbers(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcNumber numLeft = left as CalcNumber;
       CalcNumber numRight = right as CalcNumber;
 
@@ -144,7 +144,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Multiplies a list by a number.
-    private static CalcValue BinTimesList(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinTimesList(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcList lstLeft = left as CalcList;
       CalcNumber numRight = right as CalcNumber;
 
@@ -175,7 +175,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Multiplies a string by a number.
-    private static CalcValue BinTimesString(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinTimesString(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcString strLeft = left as CalcString;
       CalcNumber numRight = right as CalcNumber;
 
@@ -194,7 +194,7 @@ namespace Nixill.CalcLib.Modules {
 
     #region // BIN / FUNCTIONS //
     // Returns the quotient of two numbers.
-    private static CalcValue BinDivideNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinDivideNumbers(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcNumber numLeft = left as CalcNumber;
       CalcNumber numRight = right as CalcNumber;
 
@@ -202,7 +202,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the quotient of a list's items over a number.
-    private static CalcValue BinDivideList(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinDivideList(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcList lstLeft = left as CalcList;
       CalcNumber numRight = right as CalcNumber;
 
@@ -219,13 +219,13 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Throws an exception, but exists. Can be overloaded by other modules.
-    private static CalcValue BinDivideStringException(CalcObject left, CalcObject right, CLLocalStore vars, object context) =>
+    private static CalcValue BinDivideStringException(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) =>
       throw new CLException("Strings cannot be divided by numbers.");
     #endregion
 
     #region // BIN // % ^ FUNCTIONS //
     // Returns the quotient, without remainder, of two numbers.
-    private static CalcValue BinIntDivideNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinIntDivideNumbers(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcNumber numLeft = left as CalcNumber;
       CalcNumber numRight = right as CalcNumber;
 
@@ -233,7 +233,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the quotient, without remainder, of two numbers.
-    private static CalcValue BinModuloNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinModuloNumbers(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcNumber numLeft = left as CalcNumber;
       CalcNumber numRight = right as CalcNumber;
 
@@ -241,7 +241,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the left raised to the power of the right.
-    private static CalcValue BinPowerNumbers(CalcObject left, CalcObject right, CLLocalStore vars, object context) {
+    private static CalcValue BinPowerNumbers(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
       CalcNumber numLeft = left as CalcNumber;
       CalcNumber numRight = right as CalcNumber;
 
@@ -251,14 +251,14 @@ namespace Nixill.CalcLib.Modules {
 
     #region // PREFIX - FUNCTIONS //
     // Returns the number, negated.
-    private static CalcValue PreMinusNumber(CalcObject param, CLLocalStore vars, object context) {
+    private static CalcValue PreMinusNumber(CalcObject param, CLLocalStore vars, CLContextProvider context) {
       CalcNumber numParam = param as CalcNumber;
 
       return new CalcNumber(-numParam);
     }
 
     // Returns the string, reversed.
-    private static CalcValue PreMinusString(CalcObject param, CLLocalStore vars, object context) {
+    private static CalcValue PreMinusString(CalcObject param, CLLocalStore vars, CLContextProvider context) {
       CalcString strParam = param as CalcString;
 
       char[] chars = strParam.Value.ToCharArray();
@@ -268,7 +268,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the list, with all its elements negated.
-    private static CalcValue PreMinusList(CalcObject param, CLLocalStore vars, object context) {
+    private static CalcValue PreMinusList(CalcObject param, CLLocalStore vars, CLContextProvider context) {
       CalcList lstParam = param as CalcList;
 
       CalcValue[] lstRet = new CalcValue[lstParam.Count];
