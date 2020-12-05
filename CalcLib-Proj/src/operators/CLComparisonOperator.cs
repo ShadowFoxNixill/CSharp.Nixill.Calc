@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Varaibles;
@@ -8,7 +9,7 @@ namespace Nixill.CalcLib.Operators {
   /// Provides a set of eight <c>CLComparisonOperator</c>s that share a
   ///   common function.
   /// </summary>
-  public class CLComparisonOperatorSet {
+  public class CLComparisonOperatorSet : IEnumerable<CLComparisonOperator> {
     private Dictionary<Type, Dictionary<Type, CLComparisonFunc>> Functions = new Dictionary<Type, Dictionary<Type, CLComparisonFunc>>();
 
     /// <summary>
@@ -73,6 +74,21 @@ namespace Nixill.CalcLib.Operators {
     /// </summary>
     public CLComparisonOperator NotModulo { get; }
 
+    public IEnumerator<CLComparisonOperator> GetEnumerator() {
+      yield return Greater;
+      yield return Equal;
+      yield return Less;
+      yield return NotGreater;
+      yield return NotEqual;
+      yield return NotLess;
+      yield return Modulo;
+      yield return NotModulo;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+      return GetEnumerator();
+    }
+
     /// <summary>
     /// Creates a new <c>CLComparisonOperatorSet</c>.
     /// </summary>
@@ -112,7 +128,7 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// A single comparison, with its own symbol and comparison condition.
   /// </summary>
-  public class CLComparison {
+  public class CLComparison : IEnumerable<CLComparison> {
     /// <summary>The symbol for the comparison.</summary>
     public string PostfixSymbol { get; }
     /// <summary>
@@ -124,6 +140,24 @@ namespace Nixill.CalcLib.Operators {
     private CLComparison(string symbol, Func<decimal, decimal, bool> func) {
       PostfixSymbol = symbol;
       CompareFunction = func;
+    }
+
+    /// <summary>
+    /// Returns an iterator over all <c>CLComparison</c>s.
+    /// </summary>
+    public IEnumerator<CLComparison> GetEnumerator() {
+      yield return Greater;
+      yield return Equal;
+      yield return Less;
+      yield return NotGreater;
+      yield return NotEqual;
+      yield return NotLess;
+      yield return Modulo;
+      yield return NotModulo;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+      return GetEnumerator();
     }
 
     /// <summary>
