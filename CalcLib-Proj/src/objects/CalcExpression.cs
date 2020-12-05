@@ -234,7 +234,7 @@ namespace Nixill.CalcLib.Objects {
         }
       }
 
-      if (Name.StartsWith("*") || Name.StartsWith("^")) {
+      if (Name.StartsWith("_") || Name.StartsWith("^")) {
         if (!(vars.ContainsVar(Name))) throw new CLException("No variable named " + Name + " exists.");
         else return vars[Name];
       }
