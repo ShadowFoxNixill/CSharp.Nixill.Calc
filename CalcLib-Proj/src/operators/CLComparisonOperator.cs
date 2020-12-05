@@ -121,6 +121,43 @@ namespace Nixill.CalcLib.Operators {
       Modulo = new CLComparisonOperator(this, CLComparison.Modulo);
       NotModulo = new CLComparisonOperator(this, CLComparison.NotModulo);
     }
+
+    /// <summary>
+    /// Adds a new function for the given types.
+    /// </summary>
+    /// <param name="left">The type of the left operand.</param>
+    /// <param name="right">The type of the right operand.</param>
+    /// <param name="func">
+    /// The function that handles those operands.
+    /// </param>
+    /// <param name="replaceChildren">
+    /// Iff <c>true</c>, the functions that handle types more derived than
+    /// <c>left</c> and <c>right</c> should be removed from this operator.
+    /// </param>
+    public virtual void AddFunction(Type left, Type right, CLComparisonFunc func, bool replaceChildren = true) {
+      Dictionary<Type, CLComparisonFunc> subDict;
+
+      if (!Functions.ContainsKey(left)) {
+        subDict = new Dictionary<Type, CLComparisonFunc>();
+        Functions[left] = subDict;
+      }
+      else subDict = Functions[left];
+
+      subDict[right] = func;
+
+      // Now replace all the child types if necessary.
+      if (replaceChildren) {
+        foreach (Type leftTest in Functions.Keys) {
+          if (leftTest.IsSubclassOf(left) || leftTest == left) {
+            foreach (Type rightTest in Functions[leftTest].Keys) {
+              if (rightTest.IsSubclassOf(right) || (rightTest == right && leftTest != left)) {
+                Functions[left].Remove(right);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   public delegate CalcValue CLComparisonFunc(CalcObject left, CLComparison comp, CalcObject right, CLLocalStore vars, CLContextProvider context);
@@ -232,7 +269,7 @@ namespace Nixill.CalcLib.Operators {
       get {
         CLComparisonFunc func = Parent[left, right];
 
-        if (func != null) return (l, r, vars, context) => Parent[left, right](l, Comparison, r, vars, context);
+        if (func != null) return (l, r, vars, context) => func(l, Comparison, r, vars, context);
         else return null;
       }
     }
