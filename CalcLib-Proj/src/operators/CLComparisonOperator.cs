@@ -29,6 +29,24 @@ namespace Nixill.CalcLib.Operators {
       }
     }
 
+    /// <summary>
+    /// Returns the specific <c>CLComparisonOperator</c> for a given
+    /// <c>CLComparison</c>.
+    /// </summary>
+    public CLComparisonOperator this[CLComparison oper] {
+      get {
+        if (oper == CLComparison.Greater) return Greater;
+        else if (oper == CLComparison.Equal) return Equal;
+        else if (oper == CLComparison.Less) return Less;
+        else if (oper == CLComparison.NotGreater) return NotGreater;
+        else if (oper == CLComparison.NotEqual) return NotEqual;
+        else if (oper == CLComparison.NotLess) return NotLess;
+        else if (oper == CLComparison.Modulo) return Modulo;
+        else if (oper == CLComparison.NotModulo) return NotModulo;
+        else return null;
+      }
+    }
+
     public string PrefixSymbol { get; }
     public int Priority { get; }
     public bool ValueBasedLeft { get; }
@@ -174,6 +192,11 @@ namespace Nixill.CalcLib.Operators {
     /// </summary>
     public Func<decimal, decimal, bool> CompareFunction { get; }
 
+    /// <summary>
+    /// The opposite <c>CLComparison</c> to this one.
+    /// </summary>
+    public CLComparison Opposite { get; private set; }
+
     private CLComparison(string symbol, Func<decimal, decimal, bool> func) {
       PostfixSymbol = symbol;
       CompareFunction = func;
@@ -244,6 +267,18 @@ namespace Nixill.CalcLib.Operators {
     ///   true iff <c>left % right != 0</c>.
     /// </summary>
     public static readonly CLComparison NotModulo = new CLComparison("!%", (left, right) => left % right != 0);
+
+    // set all the opposites to each other
+    static CLComparison() {
+      Greater.Opposite = NotGreater;
+      NotGreater.Opposite = Greater;
+      Less.Opposite = NotLess;
+      NotLess.Opposite = Less;
+      Equal.Opposite = NotEqual;
+      NotEqual.Opposite = Equal;
+      Modulo.Opposite = NotModulo;
+      NotModulo.Opposite = Modulo;
+    }
   }
 
   /// <summary>
@@ -258,6 +293,12 @@ namespace Nixill.CalcLib.Operators {
     /// <c>CLComparisonOperator</c> is a part.
     /// </summary>
     public CLComparisonOperatorSet Parent { get; internal set; }
+
+    /// <summary>
+    /// The <c>CLComparisonOperator</c> from the same parent set as this
+    /// one, but with the opposite <c>CLComparison</c>.
+    /// </summary>
+    public CLComparisonOperator Opposite => Parent[Comparison.Opposite];
 
     /// <summary>
     /// The <c>CLComparison</c> that this <c>CLComparisonOperator</c>
