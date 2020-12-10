@@ -74,7 +74,8 @@ namespace Nixill.CalcLib.Objects {
     }
 
     public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null) {
-      vars = vars ?? new CLLocalStore();
+      vars ??= new CLLocalStore();
+      context ??= new CLContextProvider();
       return Function.FunctionDef.Invoke(Params, vars, context);
     }
 
@@ -142,7 +143,8 @@ namespace Nixill.CalcLib.Objects {
     }
 
     public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null) {
-      vars = vars ?? new CLLocalStore();
+      vars ??= new CLLocalStore();
+      context ??= new CLContextProvider();
 
       CalcValue[] ret = new CalcValue[_list.Length];
 
@@ -220,13 +222,14 @@ namespace Nixill.CalcLib.Objects {
 
     /// <summary>
     /// Returns the object referenced by the name.
-    /// </summary>0
+    /// </summary>
     /// <param name="vars">A <c>CLLocalStore</c> that stores local
     ///   variables.</param>
     /// <param name="context">The object representing the context in which
     ///   the expression is being evaluated.</param>
     public CalcObject GetObject(CLLocalStore vars = null, CLContextProvider context = null) {
-      vars = vars ?? new CLLocalStore();
+      vars ??= new CLLocalStore();
+      context ??= new CLContextProvider();
 
       if (Name.StartsWith("!")) {
         if (CLCodeFunction.Exists(Name.Substring(1))) {
@@ -258,7 +261,8 @@ namespace Nixill.CalcLib.Objects {
     }
 
     public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null) {
-      vars = vars ?? new CLLocalStore();
+      vars ??= new CLLocalStore();
+      context ??= new CLContextProvider();
 
       CalcObject obj = GetObject(vars, context);
 
@@ -341,7 +345,8 @@ namespace Nixill.CalcLib.Objects {
     }
 
     public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null) {
-      vars = vars ?? new CLLocalStore();
+      vars ??= new CLLocalStore();
+      context ??= new CLContextProvider();
 
       if (Operator is CLBinaryOperator bin) return bin.Run(Left, Right, vars, context);
       else if (Operator is CLPrefixOperator pre) return pre.Run(Right, vars, context);
