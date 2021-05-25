@@ -3,12 +3,12 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageId>CalcLib</PackageId>
+    <PackageId>Nixill.Calc</PackageId>
     <Version>$(RELEASE_VERSION)</Version>
     <Authors>Nixill</Authors>
     <PackageDescription>A basic calculation parser.</PackageDescription>
     <RepositoryUrl>https://github.com/ShadowFoxNixill/CalcLib</RepositoryUrl>
-    <RootNamespace>Nixill</RootNamespace>
+    <RootNamespace>Nixill.Calc</RootNamespace>
   </PropertyGroup>
 
 </Project>
