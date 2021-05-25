@@ -1,6 +1,6 @@
 # thanks to https://github.com/SierraSoftworks/sierralib.api.views/blob/master/.github/workflows/package.yml for helping me figure this out
 # GitHub's own documentation was a bit lacking.
-name: Publish to GitHub Packages
+name: Publish to NuGet
 
 on:
   release:
@@ -36,15 +36,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./CalcLib-Proj/out/CalcLib.${{ github.event.release.tag_name }}.nupkg
-          asset_name: CalcLib.${{ github.event.release.tag_name }}.nupkg
+          asset_path: ./CalcLib-Proj/out/CalcLib-Proj.${{ github.event.release.tag_name }}.nupkg
+          asset_name: CalcLib-Proj.${{ github.event.release.tag_name }}.nupkg
           asset_content_type: application/zip
-      - name: Push to github packages
+      - name: Push to nuget.org
         run: |
           cd CalcLib-Proj
           for f in ./out/*.nupkg
           do
-            curl -vX PUT -u "ShadowFoxNixill:${{ secrets.GITHUB_TOKEN }}" -F package=@$f https://nuget.pkg.github.com/ShadowFoxNixill
+            dotnet nuget push $f --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json
           done
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
