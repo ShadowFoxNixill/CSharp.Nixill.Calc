@@ -12,6 +12,7 @@ namespace Nixill.CalcLib.Modules {
 
     public const int PlusPriority = 0;
     public const int TimesPriority = PlusPriority + 5;
+    public const int PowerPriority = TimesPriority + 10;
 
     public static CLBinaryOperator BinaryPlus { get; private set; }
     public static CLBinaryOperator BinaryMinus { get; private set; }
@@ -56,7 +57,7 @@ namespace Nixill.CalcLib.Modules {
       // The binary / operator
       BinaryDivide = CLOperators.BinaryOperators.GetOrNull("/") ?? new CLBinaryOperator("/", TimesPriority, true, true);
       BinaryDivide.AddFunction(num, num, BinDivideNumbers);
-      BinaryDivide.AddFunction(num, lst, (left, right, vars, context) => BinDivideList(right, left, vars, context));
+      BinaryDivide.AddFunction(num, lst, (left, right, vars, context) => BinDivideNumbers(left, ListToNum(right), vars, context));
       BinaryDivide.AddFunction(lst, num, BinDivideList);
       BinaryDivide.AddFunction(lst, lst, (left, right, vars, context) => BinDivideList(left, ListToNum(right), vars, context));
       BinaryDivide.AddFunction(str, num, BinDivideStringException);
@@ -77,7 +78,11 @@ namespace Nixill.CalcLib.Modules {
       BinaryModulo.AddFunction(lst, lst, (left, right, vars, context) => BinModuloNumbers(ListToNum(left), ListToNum(right), vars, context));
 
       // The binary ^ operator
-      BinaryPower = CLOperators.BinaryOperators.GetOrNull("^") ?? new CLBinaryOperator("^", TimesPriority, true, true);
+      BinaryPower = CLOperators.BinaryOperators.GetOrNull("^");
+      if (BinaryPower == null) {
+        BinaryPower = new CLBinaryOperator("^", PowerPriority, true, true);
+        CLOperators.SetFromRight(PowerPriority);
+      }
       BinaryPower.AddFunction(num, num, BinPowerNumbers);
       BinaryPower.AddFunction(lst, num, (left, right, vars, context) => BinPowerNumbers(ListToNum(left), right, vars, context));
       BinaryPower.AddFunction(num, lst, (left, right, vars, context) => BinPowerNumbers(left, ListToNum(right), vars, context));

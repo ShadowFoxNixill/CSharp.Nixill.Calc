@@ -32,6 +32,10 @@ namespace Nixill.Test {
       TestLine("{!abs,-4}");
       TestLine("{!sin,1}");
       TestLine("{!max,2,-3}");
+
+      // Decimal testing
+      TestLine(".4");
+      TestLine("4*.5");
     }
 
     public void TestLine(string input, bool resolve = true) {

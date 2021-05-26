@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Varaibles;
+using System.Linq;
 
 namespace Nixill.CalcLib.Objects {
   /// <summary>
@@ -91,25 +92,13 @@ namespace Nixill.CalcLib.Objects {
       else ret = Sum() + " [";
 
       if (level == 0) ret += " ... ";
-      else {
-        foreach (CalcValue cv in _list) {
-          ret += cv.ToString(level - 1) + ", ";
-        }
-        ret = ret.Substring(0, ret.Length - 2);
-      }
+      else ret += string.Join(", ", _list.Select(x => x.ToString(level - 1)));
 
       return ret + "]";
     }
 
-    public override string ToCode() {
-      string ret = "[";
-
-      foreach (CalcValue cv in _list) {
-        ret += cv.ToCode() + ",";
-      }
-
-      return ret.Substring(0, ret.Length - 1) + "]";
-    }
+    public override string ToCode() =>
+      "[" + string.Join(",", _list.Select(x => x.ToCode())) + "]";
 
     /// <summary>
     /// Returns whether there are any <c>CalcString</c>s in this

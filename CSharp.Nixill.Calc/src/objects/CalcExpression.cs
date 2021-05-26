@@ -5,6 +5,7 @@ using Nixill.CalcLib.Functions;
 using Nixill.CalcLib.Varaibles;
 using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Operators;
+using System.Linq;
 
 namespace Nixill.CalcLib.Objects {
   /// <summary>
@@ -79,24 +80,15 @@ namespace Nixill.CalcLib.Objects {
       return Function.FunctionDef.Invoke(Params, vars, context);
     }
 
-    public override string ToCode() {
-      string ret = "{!" + Function.Name;
-
-      foreach (CalcObject obj in Params) {
-        ret += "," + obj.ToCode();
-      }
-
-      return ret + "}";
-    }
+    public override string ToCode() =>
+      "{!" + Function.Name + string.Join("", Params.Select(x => "," + x.ToCode())) + "}";
 
     public override string ToString(int level) {
       string ret = "{!" + Function.Name;
 
-      if (Params.Length >= 1) {
+      if (Params.Any()) {
         if (level == 0) ret += ", ...";
-        else foreach (CalcObject obj in Params) {
-            ret += ", " + obj.ToString(level - 1);
-          }
+        else ret += string.Join("", Params.Select(x => ", " + x.ToString(level - 1)));
       }
 
       return ret + "}";
@@ -159,25 +151,13 @@ namespace Nixill.CalcLib.Objects {
       string ret = "[";
 
       if (level == 0) ret += " ... ";
-      else {
-        foreach (CalcObject cv in _list) {
-          ret += cv.ToString(level - 1) + ", ";
-        }
-        ret = ret.Substring(0, ret.Length - 2);
-      }
+      else ret = string.Join(", ", _list.Select(x => x.ToString(level - 1)));
 
       return ret + "]";
     }
 
-    public override string ToCode() {
-      string ret = "[";
-
-      foreach (CalcObject cv in _list) {
-        ret += cv.ToCode() + ",";
-      }
-
-      return ret.Substring(0, ret.Length - 1) + "]";
-    }
+    public override string ToCode() =>
+      "[" + string.Join(",", _list.Select(x => x.ToCode())) + "]";
 
     public override string ToTree(int level) {
       string ret = new string(' ', level * 2) + "ListExpression:";
@@ -271,21 +251,15 @@ namespace Nixill.CalcLib.Objects {
       return obj.GetValue(vars);
     }
 
-    public override string ToCode() {
-      string ret = "{" + Name;
-
-      foreach (CalcObject obj in Params) {
-        ret += "," + obj.ToCode();
-      }
-
-      return ret + "}";
-    }
+    public override string ToCode() =>
+      "{" + Name + string.Join("", Params.Select(x => "," + x.ToCode())) + "}";
 
     public override string ToString(int level) {
       string ret = "{" + Name;
 
-      foreach (CalcObject obj in Params) {
-        ret += ", " + obj.ToString(level - 1);
+      if (Params.Any()) {
+        if (level == 0) ret += ", ...";
+        else ret += string.Join("", Params.Select(x => ", " + x.ToString(level - 1)));
       }
 
       return ret + "}";

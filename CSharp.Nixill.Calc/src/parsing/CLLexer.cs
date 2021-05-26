@@ -23,7 +23,7 @@ namespace Nixill.CalcLib.Parsing {
   /// </summary>
   public class CLLexer {
     private static Regex rgxWhitespace = new Regex(@"^[ `\t\n]");
-    private static Regex rgxNumber = new Regex(@"^(0|[1-9]\d*)(\.\d+)?");
+    private static Regex rgxNumber = new Regex(@"^((0|[1-9]\d*)(\.\d+)?|(\.\d+))");
     private static Regex rgxSeparator = new Regex(@"^[\(\)\[\]\,\}]");
     private static Regex rgxComment = new Regex(@"^\{\%[^\}]*}");
     private static Regex rgxName = new Regex(@"^\{([\$_\^\!]?[a-zA-Z]([a-zA-Z_\-0-9]*[a-zA-Z0-9])?|\d+)");
