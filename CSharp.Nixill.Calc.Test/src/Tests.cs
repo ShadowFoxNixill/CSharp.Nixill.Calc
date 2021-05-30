@@ -23,8 +23,8 @@ namespace Nixill.Test {
       CLVariables.VariableLoaded += Loader.Load;
       TestLine("2^5");
       TestLine("{two}^{four}");
-      TestLine("{level,3}");
-      TestLine("{level,10}");
+      TestLine("{ level, 3}");
+      TestLine("{ level , 10}");
       TestLine("{level}");
 
       // Math module tests

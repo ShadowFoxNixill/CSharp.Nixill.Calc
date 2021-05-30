@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Operators;
@@ -10,6 +11,8 @@ namespace Nixill.CalcLib.Parsing {
   ///   <c>CalcObject</c>s.
   /// </summary>
   public class CLParser {
+    private static Regex rgxName = new Regex(@"^\{(?:[ `\t\n])*([\$_\^\!]?[a-zA-Z]([a-zA-Z_\-0-9]*[a-zA-Z0-9])?|\d+)");
+
     /// <summary>
     /// The method that turns a <c>List</c> of pieces into a full tree of
     ///   <c>CalcObject</c>s.
@@ -256,8 +259,11 @@ namespace Nixill.CalcLib.Parsing {
       CLObjectPiece lbrace = pieces[0];
       pieces.RemoveAt(0);
 
-      string name = lbrace.Contents.Substring(1);
+      string opener = lbrace.Contents;
+
       List<CalcObject> pars = new List<CalcObject>();
+      Match mtcName = rgxName.Match(opener);
+      string name = mtcName.Groups[1].Value;
 
       // And again, no-param functions are allowed.
       CLObjectPiece next = pieces[0];

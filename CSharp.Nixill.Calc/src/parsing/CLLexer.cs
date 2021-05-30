@@ -26,7 +26,7 @@ namespace Nixill.CalcLib.Parsing {
     private static Regex rgxNumber = new Regex(@"^((0|[1-9]\d*)(\.\d+)?|(\.\d+))");
     private static Regex rgxSeparator = new Regex(@"^[\(\)\[\]\,\}]");
     private static Regex rgxComment = new Regex(@"^\{\%[^\}]*}");
-    private static Regex rgxName = new Regex(@"^\{([\$_\^\!]?[a-zA-Z]([a-zA-Z_\-0-9]*[a-zA-Z0-9])?|\d+)");
+    private static Regex rgxName = new Regex(@"^\{(?:[ `\t\n])*([\$_\^\!]?[a-zA-Z]([a-zA-Z_\-0-9]*[a-zA-Z0-9])?|\d+)");
     private static Regex rgxString = new Regex(@"^\""([^\\\""]|\\[^A-Za-z0-9])*\""");
     private static Regex rgxOperator = new Regex(@"^[a-z\<\>\/\?\|\~\!\#\$\%\^\&\*\-\=\+ `\t\n]+");
 
