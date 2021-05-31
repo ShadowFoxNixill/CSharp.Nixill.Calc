@@ -36,6 +36,9 @@ namespace Nixill.Test {
       // Decimal testing
       TestLine(".4");
       TestLine("4*.5");
+
+      // Operator testing
+      TestLine("5+--3");
     }
 
     public void TestLine(string input, bool resolve = true) {

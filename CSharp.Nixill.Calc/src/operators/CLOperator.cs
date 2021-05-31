@@ -154,10 +154,10 @@ namespace Nixill.CalcLib.Operators {
 
     // Initializes regexes with the existing keys
     private static void InitRegexes() {
-      string ptnPrefix = KeysToPattern(PrefixOperators.Keys);
+      ptnPrefix = KeysToPattern(PrefixOperators.Keys);
       rgxPrefix = new Regex(ptnPrefix);
 
-      string ptnPostfix = KeysToPattern(PostfixOperators.Keys);
+      ptnPostfix = KeysToPattern(PostfixOperators.Keys);
       rgxPostfix = new Regex(ptnPostfix);
 
       string ptnBinary = KeysToPattern(BinaryOperators.Keys);
