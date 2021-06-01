@@ -38,7 +38,7 @@ namespace Nixill.Test {
       TestLine("4*.5");
 
       // Operator testing
-      TestLine("5+--3");
+      TestLine("3!!+--3");
     }
 
     public void TestLine(string input, bool resolve = true) {

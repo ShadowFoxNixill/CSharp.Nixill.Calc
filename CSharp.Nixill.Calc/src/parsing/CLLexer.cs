@@ -22,15 +22,15 @@ namespace Nixill.CalcLib.Parsing {
   /// Lexes the input (splitting it into separate pieces)
   /// </summary>
   public class CLLexer {
-    private static Regex rgxWhitespace = new Regex(@"^[ `\t\n]");
-    private static Regex rgxNumber = new Regex(@"^((0|[1-9]\d*)(\.\d+)?|(\.\d+))");
-    private static Regex rgxSeparator = new Regex(@"^[\(\)\[\]\,\}]");
-    private static Regex rgxComment = new Regex(@"^\{\%[^\}]*}");
-    private static Regex rgxName = new Regex(@"^\{(?:[ `\t\n])*([\$_\^\!]?[a-zA-Z]([a-zA-Z_\-0-9]*[a-zA-Z0-9])?|\d+)");
-    private static Regex rgxString = new Regex(@"^\""([^\\\""]|\\[^A-Za-z0-9])*\""");
-    private static Regex rgxOperator = new Regex(@"^[a-z\<\>\/\?\|\~\!\#\$\%\^\&\*\-\=\+ `\t\n]+");
+    internal static Regex rgxWhitespace = new Regex(@"^[ `\t\n]");
+    internal static Regex rgxNumber = new Regex(@"^((0|[1-9]\d*)(\.\d+)?|(\.\d+))");
+    internal static Regex rgxSeparator = new Regex(@"^[\(\)\[\]\,\}]");
+    internal static Regex rgxComment = new Regex(@"^\{\%[^\}]*}");
+    internal static Regex rgxName = new Regex(@"^\{(?:[ `\t\n])*([\$_\^\!]?[a-zA-Z]([a-zA-Z_\-0-9]*[a-zA-Z0-9])?|\d+)");
+    internal static Regex rgxString = new Regex(@"^\""([^\\\""]|\\[^A-Za-z0-9])*\""");
+    internal static Regex rgxOperator = new Regex(@"^[a-z\<\>\/\?\|\~\!\#\$\%\^\&\*\-\=\+ `\t\n]+");
 
-    private static Regex rgxWhitespaceReplace = new Regex(@"[ `\t\n]");
+    internal static Regex rgxWhitespaceReplace = new Regex(@"[ `\t\n]");
 
     public static List<CLObjectPiece> Lex(string input) {
       List<CLObjectPiece> ret = new List<CLObjectPiece>();

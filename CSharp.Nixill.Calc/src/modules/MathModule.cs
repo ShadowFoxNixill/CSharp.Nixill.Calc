@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Functions;
 using Nixill.CalcLib.Objects;
@@ -9,6 +10,8 @@ using static Nixill.CalcLib.Modules.Casting;
 namespace Nixill.CalcLib.Modules {
   public class MathModule {
     public static bool Loaded { get; private set; } = false;
+
+    public const int FactPriority = MainModule.PowerPriority;
 
     private static CalcNumber numE;
     private static CalcNumber numPI;
@@ -40,7 +43,7 @@ namespace Nixill.CalcLib.Modules {
     public static CLCodeFunction Tan { get; private set; }
     public static CLCodeFunction Tanh { get; private set; }
 
-    public static CLBinaryOperator Exponent { get; private set; }
+    public static CLPostfixOperator PostFactorial { get; private set; }
 
     public static void Load() {
       // First we need some local types
@@ -49,11 +52,9 @@ namespace Nixill.CalcLib.Modules {
       Type str = typeof(CalcString);
       Type val = typeof(CalcValue);
 
-      Exponent = CLOperators.BinaryOperators.GetOrNull("^");
-      Exponent.AddFunction(num, num, BinPowerNumbers);
-      Exponent.AddFunction(lst, num, (left, right, vars, context) => BinPowerNumbers(ListToNum(left), right, vars, context));
-      Exponent.AddFunction(lst, lst, (left, right, vars, context) => BinPowerNumbers(ListToNum(left), ListToNum(right), vars, context));
-      Exponent.AddFunction(num, lst, (left, right, vars, context) => BinPowerNumbers(left, ListToNum(right), vars, context));
+      PostFactorial = CLOperators.PostfixOperators.GetOrNull("!") ?? new CLPostfixOperator("!", FactPriority, true);
+      PostFactorial.AddFunction(num, PostFactNumber);
+      PostFactorial.AddFunction(lst, (param, vars, context) => PostFactNumber(ListToNum(param), vars, context));
 
       numE = new CalcNumber((decimal)Math.E);
       numPI = new CalcNumber((decimal)Math.PI);
@@ -87,11 +88,15 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Raises one number to the power of another.
-    private static CalcValue BinPowerNumbers(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
-      CalcNumber numLeft = left as CalcNumber;
-      CalcNumber numRight = right as CalcNumber;
+    private static CalcValue PostFactNumber(CalcObject param, CLLocalStore vars, CLContextProvider context) {
+      CalcNumber num = param as CalcNumber;
+      int o = 1;
 
-      return new CalcNumber((decimal)Math.Pow((double)numLeft.Value, (double)numRight.Value));
+      for (int i = 2; i < num.Value; i++) {
+        o *= i;
+      }
+
+      return new CalcNumber(o);
     }
 
     // Calculates the absolute value of a number.

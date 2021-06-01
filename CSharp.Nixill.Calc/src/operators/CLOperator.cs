@@ -34,112 +34,98 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="level">The level to check.</param>
     public static bool IsFromRight(int level) => FromRightOperators.Contains(level);
 
-    // internal static Dictionary<string, CLOperator> PrefixOperators = new Dictionary<string, CLOperator>();
-    // internal static Dictionary<string, CLOperator> BinaryOperators = new Dictionary<string, CLOperator>();
-    // internal static Dictionary<string, CLOperator> PostfixOperators = new Dictionary<string, CLOperator>();
-
     public static readonly CLOperatorList<CLPrefixOperator> PrefixOperators = new CLOperatorList<CLPrefixOperator>();
     public static readonly CLOperatorList<CLBinaryOperator> BinaryOperators = new CLOperatorList<CLBinaryOperator>();
     public static readonly CLOperatorList<CLPostfixOperator> PostfixOperators = new CLOperatorList<CLPostfixOperator>();
 
-    private static string ptnPrefix;
-    private static string ptnPostfix;
-
-    private static Regex rgxPrefix;
-    private static Regex rgxPostfix;
-    private static Regex rgxCombined;
     private static Regex rgxSymbol = new Regex(@"([^a-zA-Z0-9])");
     internal static bool rgxInitiated = false;
 
     public static List<CLObjectPiece> GetOpers(string input, bool prefix, bool postfix, int pos) {
-      // First, let's see if the whole thing matches an operator.
-      if (prefix) {
-        if (PrefixOperators.ContainsKey(input))
-          return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.PrefixOperator, pos));
-      }
-      else if (postfix) {
-        if (PostfixOperators.ContainsKey(input))
-          return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.PostfixOperator, pos));
-      }
-      else {
-        if (BinaryOperators.ContainsKey(input))
-          return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.BinaryOperator, pos));
-      }
+      // Remove whitespace
+      input = CLLexer.rgxWhitespaceReplace.Replace(input, "");
 
       // Otherwise let's go through the group to see if we can split it into many
-      if (!rgxInitiated) InitRegexes();
-
       if (prefix) {
-        return GetMultiOpers(input, ptnPrefix, CLObjectPieceType.PrefixOperator, ref pos);
+        return RecursiveGetPrefixOpers(input, pos);
       }
       else if (postfix) {
-        return GetMultiOpers(input, ptnPostfix, CLObjectPieceType.PostfixOperator, ref pos);
+        return RecursiveGetPostfixOpers(input, pos);
       }
       else {
-        List<CLObjectPiece> ret = new List<CLObjectPiece>();
-        Match match;
-
-        // Try to match against the whole thing
-        if (CLUtils.RegexMatches(rgxCombined, input, out match)) {
-          string sPostfix = match.Groups[1].Value;
-          string sBinary = match.Groups[3].Value;
-          string sPrefix = match.Groups[4].Value;
-
-          // what postfix operator(s) do we have?
-          if (sPostfix != "") {
-            if (PostfixOperators.ContainsKey(sPostfix)) {
-              ret.Add(new CLObjectPiece(sPostfix, CLObjectPieceType.PostfixOperator, pos));
-              pos += sPostfix.Length;
-            }
-            else {
-              ret.AddRange(GetMultiOpers(sPostfix, ptnPostfix, CLObjectPieceType.PostfixOperator, ref pos));
-            }
-          }
-
-          // what binary operator do we have?
-          ret.Add(new CLObjectPiece(sBinary, CLObjectPieceType.BinaryOperator, pos));
-          pos += sBinary.Length;
-
-          // what prefix operator(s) do we have?
-          if (sPrefix != "") {
-            if (PrefixOperators.ContainsKey(sPrefix)) {
-              ret.Add(new CLObjectPiece(sPrefix, CLObjectPieceType.PrefixOperator, pos));
-              pos += sPrefix.Length;
-            }
-            else {
-              ret.AddRange(GetMultiOpers(sPrefix, ptnPrefix, CLObjectPieceType.PrefixOperator, ref pos));
-            }
-          }
-
-          return ret;
-        }
-
-        // We didn't match a valid operator group
-        throw new CLSyntaxException("I don't know what the operator " + input + " is.", pos);
+        return RecursiveGetOpers(input, pos);
       }
     }
 
-    // Returns a chain of multiple prefix or postfix operators 
-    private static List<CLObjectPiece> GetMultiOpers(string text, string ptnRegex, CLObjectPieceType pieceType, ref int pos) {
-      string multiPattern = ptnRegex;
-      Match match;
+    // Recursively gets prefix operators from the list
+    private static List<CLObjectPiece> RecursiveGetPrefixOpers(string input, int pos) {
+      if (PrefixOperators.ContainsKey(input))
+        return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.PrefixOperator, pos));
 
-      for (int i = 2; i <= text.Length; i++) {
-        multiPattern += ptnRegex;
-        Regex ptnTest = new Regex("^" + multiPattern + "$");
+      for (int i = 1; i < input.Length; i++) {
+        string thisOper = input[0..i];
+        string remOper = input[i..^0];
 
-        if (CLUtils.RegexMatches(ptnTest, text, out match)) {
-          List<CLObjectPiece> ret = new List<CLObjectPiece>();
-          for (int j = 1; j <= i; j++) {
-            ret.Add(new CLObjectPiece(match.Groups[j].Value, pieceType, pos));
-            pos += match.Groups[j].Value.Length;
+        if (PrefixOperators.ContainsKey(thisOper)) {
+          var list = RecursiveGetPrefixOpers(remOper, pos + thisOper.Length);
+          if (list != null) {
+            list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PrefixOperator, pos));
+            return list;
           }
-
-          return ret;
         }
       }
 
-      throw new CLSyntaxException("I don't know what the operator " + text + " is.", pos);
+      return null;
+    }
+
+    // Recursively gets prefix operators from the list
+    private static List<CLObjectPiece> RecursiveGetOpers(string input, int pos) {
+      if (BinaryOperators.ContainsKey(input))
+        return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.BinaryOperator, pos));
+
+      for (int i = 1; i < input.Length; i++) {
+        string thisOper = input[0..i];
+        string remOper = input[i..^0];
+
+        if (BinaryOperators.ContainsKey(thisOper)) {
+          var list = RecursiveGetPrefixOpers(remOper, pos + thisOper.Length);
+          if (list != null) {
+            list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.BinaryOperator, pos));
+            return list;
+          }
+        }
+
+        else if (PostfixOperators.ContainsKey(thisOper)) {
+          var list = RecursiveGetOpers(remOper, pos + thisOper.Length);
+          if (list != null) {
+            list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PostfixOperator, pos));
+            return list;
+          }
+        }
+      }
+
+      return null;
+    }
+
+    // Recursively gets prefix operators from the list
+    private static List<CLObjectPiece> RecursiveGetPostfixOpers(string input, int pos) {
+      if (PostfixOperators.ContainsKey(input))
+        return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.PostfixOperator, pos));
+
+      for (int i = 1; i < input.Length; i++) {
+        string thisOper = input[0..i];
+        string remOper = input[i..^0];
+
+        if (PostfixOperators.ContainsKey(thisOper)) {
+          var list = RecursiveGetPostfixOpers(remOper, pos + thisOper.Length);
+          if (list != null) {
+            list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PostfixOperator, pos));
+            return list;
+          }
+        }
+      }
+
+      return null;
     }
 
     // Takes the keys from a dictionary and turns them into a regex that matches any one key
@@ -150,20 +136,6 @@ namespace Nixill.CalcLib.Operators {
       }
       if (ret == "") return "()";
       else return "(" + ret.Substring(1) + ")";
-    }
-
-    // Initializes regexes with the existing keys
-    private static void InitRegexes() {
-      ptnPrefix = KeysToPattern(PrefixOperators.Keys);
-      rgxPrefix = new Regex(ptnPrefix);
-
-      ptnPostfix = KeysToPattern(PostfixOperators.Keys);
-      rgxPostfix = new Regex(ptnPostfix);
-
-      string ptnBinary = KeysToPattern(BinaryOperators.Keys);
-      rgxCombined = new Regex("(" + ptnPostfix + "*)" + ptnBinary + "(" + ptnPrefix + "*)");
-
-      rgxInitiated = true;
     }
   }
 
