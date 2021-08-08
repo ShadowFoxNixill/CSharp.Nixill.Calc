@@ -16,6 +16,10 @@ namespace Nixill.CalcLib.Varaibles {
     /// Fired when an expression attempts to save a variable.
     /// </summary>
     public static event EventHandler<CLVariableSave> VariableSaved = (sender, pars) => { };
+    /// <summary>
+    /// Fired when an expression attempts to delete a variable.
+    /// </summary>
+    public static event EventHandler<CLVariableDelete> VariableDeleted = (sender, pars) => { };
 
     private static Dictionary<string, CalcObject> InternalStorage = new Dictionary<string, CalcObject>();
 
@@ -62,6 +66,23 @@ namespace Nixill.CalcLib.Varaibles {
 
       if (!data.Saved) InternalStorage[name] = val;
     }
+
+    /// <summary>
+    /// Deletes a saved variable.
+    /// </summary>
+    /// <param name="name">The name of the variable to delete.</param>
+    /// <param name="contet">
+    /// An object representing the context in which it's run.
+    /// </param>
+    public static void Delete(string name, CLContextProvider context) {
+      CLVariableDelete data = new CLVariableDelete() {
+        Name = name
+      };
+
+      VariableDeleted.Invoke(context, data);
+
+      if (!data.Deleted) InternalStorage.Remove(name);
+    }
   }
 
   /// <summary>Event data for when a variable loads.</summary>
@@ -82,5 +103,13 @@ namespace Nixill.CalcLib.Varaibles {
     public CalcObject Value { get; internal set; }
     /// <summary>Set this to true when the variable is saved.</summary>
     public bool Saved = false;
+  }
+
+  /// <summary>Event data for when a variable is deleted.</summary>
+  public class CLVariableDelete {
+    /// <summary>The name of the variable to delete.</summary>
+    public string Name { get; internal set; }
+    /// <summary>Set this to true when the variable is deleted.</summary>
+    public bool Deleted = false;
   }
 }
