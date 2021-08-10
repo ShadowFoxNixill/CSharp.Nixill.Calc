@@ -45,16 +45,8 @@ namespace Nixill.CalcLib.Modules {
 
     public static CLPostfixOperator PostFactorial { get; private set; }
 
-    public static void Load() {
-      // First we need some local types
-      Type num = typeof(CalcNumber);
-      Type lst = typeof(CalcList);
-      Type str = typeof(CalcString);
-      Type val = typeof(CalcValue);
-
-      PostFactorial = CLOperators.PostfixOperators.GetOrNull("!") ?? new CLPostfixOperator("!", FactPriority, true);
-      PostFactorial.AddFunction(num, PostFactNumber);
-      PostFactorial.AddFunction(lst, (param, vars, context) => PostFactNumber(ListToNum(param), vars, context));
+    public static void Load(int factPriority = FactPriority) {
+      LoadPostFactorial(factPriority);
 
       numE = new CalcNumber((decimal)Math.E);
       numPI = new CalcNumber((decimal)Math.PI);
@@ -88,7 +80,15 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Raises one number to the power of another.
-    private static CalcValue PostFactNumber(CalcObject param, CLLocalStore vars, CLContextProvider context) {
+    public static CLPostfixOperator LoadPostFactorial(int priority = FactPriority) {
+      PostFactorial = CLOperators.PostfixOperators.GetOrNull("!") ?? new CLPostfixOperator("!", FactPriority, true);
+      PostFactorial.AddFunction(tNum, PostFactNumber);
+      PostFactorial.AddFunction(tLst, (param, vars, context) => PostFactNumber(ListToNum(param), vars, context));
+
+      return PostFactorial;
+    }
+
+    public static CalcValue PostFactNumber(CalcObject param, CLLocalStore vars, CLContextProvider context) {
       CalcNumber num = param as CalcNumber;
       int o = 1;
 
@@ -100,7 +100,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the absolute value of a number.
-    private static CalcValue AbsFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue AbsFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!abs} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!abs", vars, context);
@@ -108,7 +108,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified cosine (-1 ≤ input ≤ 1).
-    private static CalcValue AcosFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue AcosFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!acos} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!acos", vars, context);
@@ -116,7 +116,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified hyperbolic cosine (1 ≤ input).
-    private static CalcValue AcoshFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue AcoshFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!acosh} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!acosh", vars, context);
@@ -124,7 +124,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified sine (-1 ≤ input ≤ 1).
-    private static CalcValue AsinFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue AsinFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!asin} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!asin", vars, context);
@@ -132,7 +132,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified hyperbolic sine.
-    private static CalcValue AsinhFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue AsinhFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!asinh} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!asinh", vars, context);
@@ -140,7 +140,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified tangent.
-    private static CalcValue AtanFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue AtanFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!atan} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!atan", vars, context);
@@ -148,7 +148,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified hyperbolic tangent (-1 ≤ input ≤ 1).
-    private static CalcValue AtanhFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue AtanhFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!atanh} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!atanh", vars, context);
@@ -156,7 +156,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the cosine of a given angle
-    private static CalcValue CosFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue CosFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!cos} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!cos", vars, context);
@@ -164,7 +164,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified hyperbolic cosine (1 ≤ input).
-    private static CalcValue CoshFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue CoshFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!cosh} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!cosh", vars, context);
@@ -172,7 +172,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified sine (-1 ≤ input ≤ 1).
-    private static CalcValue SinFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue SinFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!sin} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!sin", vars, context);
@@ -180,7 +180,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified hyperbolic sine.
-    private static CalcValue SinhFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue SinhFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!sinh} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!sinh", vars, context);
@@ -188,7 +188,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified tangent.
-    private static CalcValue TanFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue TanFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!tan} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!tan", vars, context);
@@ -196,7 +196,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle that gives a specified hyperbolic tangent (-1 ≤ input ≤ 1).
-    private static CalcValue TanhFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue TanhFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!tanh} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!tanh", vars, context);
@@ -204,7 +204,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Calculates the angle of a given set of coordinates.
-    private static CalcValue Atan2Function(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue Atan2Function(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length < 2) throw new CLException("{!atan2} requires two numbers.");
 
       CalcNumber y = NumberAt(pars, 0, "!atan2", vars, context);
@@ -213,7 +213,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the smallest integral value greater than or equal to the parameter. (Rounds towards +∞)
-    private static CalcValue CeilingFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue CeilingFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!ceiling} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!ceiling", vars, context);
@@ -221,7 +221,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns a number with magnitude x and sign of y
-    private static CalcValue CopySignFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue CopySignFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length < 2) throw new CLException("{!copysign} requires two numbers.");
 
       CalcNumber x = NumberAt(pars, 0, "!copysign", vars, context);
@@ -230,7 +230,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the largest integral value less than or equal to the parameter. (Rounds towards -∞)
-    private static CalcValue FloorFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue FloorFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!floor} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!floor", vars, context);
@@ -238,7 +238,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the natural logarithm of the parameter.
-    private static CalcValue LogFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue LogFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!log} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!floor", vars, context);
@@ -246,7 +246,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the maximum value out of the list.
-    private static CalcValue MaxFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue MaxFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!max} requires numbers.");
 
       decimal max = Decimal.MinValue;
@@ -260,7 +260,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the maximum value out of the list.
-    private static CalcValue MaxMagnitudeFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue MaxMagnitudeFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!maxmagnitude} requires numbers.");
 
       decimal max = (decimal)0;
@@ -276,7 +276,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the minimum value out of the list.
-    private static CalcValue MinFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue MinFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!min} requires numbers.");
 
       decimal min = Decimal.MaxValue;
@@ -290,7 +290,7 @@ namespace Nixill.CalcLib.Modules {
     }
 
     // Returns the minimum value out of the list.
-    private static CalcValue MinMagnitudeFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue MinMagnitudeFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!minmagnitude} requires numbers.");
 
       decimal min = (decimal)Decimal.MinValue;
@@ -305,7 +305,7 @@ namespace Nixill.CalcLib.Modules {
       return new CalcNumber(min);
     }
 
-    private static CalcValue SignFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
+    public static CalcValue SignFunction(CalcObject[] pars, CLLocalStore vars, CLContextProvider context) {
       if (pars.Length == 0) throw new CLException("{!sign} requires a number.");
 
       CalcNumber num = NumberAt(pars, 0, "!sign", vars, context);

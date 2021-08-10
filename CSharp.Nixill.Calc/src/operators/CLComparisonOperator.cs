@@ -183,7 +183,7 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// A single comparison, with its own symbol and comparison condition.
   /// </summary>
-  public class CLComparison : IEnumerable<CLComparison> {
+  public class CLComparison {
     /// <summary>The symbol for the comparison.</summary>
     public string PostfixSymbol { get; }
     /// <summary>
@@ -205,7 +205,7 @@ namespace Nixill.CalcLib.Operators {
     /// <summary>
     /// Returns an iterator over all <c>CLComparison</c>s.
     /// </summary>
-    public IEnumerator<CLComparison> GetEnumerator() {
+    public static IEnumerator<CLComparison> GetEnumerator() {
       yield return Greater;
       yield return Equal;
       yield return Less;
@@ -214,10 +214,6 @@ namespace Nixill.CalcLib.Operators {
       yield return NotLess;
       yield return Modulo;
       yield return NotModulo;
-    }
-
-    IEnumerator IEnumerable.GetEnumerator() {
-      return GetEnumerator();
     }
 
     /// <summary>
