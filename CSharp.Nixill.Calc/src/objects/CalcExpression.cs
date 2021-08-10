@@ -248,7 +248,7 @@ namespace Nixill.CalcLib.Objects {
 
       vars = new CLLocalStore(Params);
 
-      return obj.GetValue(vars);
+      return obj.GetValue(vars, context);
     }
 
     public override string ToCode() =>
