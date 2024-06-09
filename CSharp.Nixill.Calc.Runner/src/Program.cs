@@ -7,7 +7,7 @@ using Nixill.CalcLib.Parsing;
 MainModule.LoadBinaryDivide();
 MainModule.LoadBinaryMinus();
 MainModule.LoadBinaryPlus();
-MainModule.LoadBinaryTimes();
+// MainModule.LoadBinaryTimes();
 
 CalcObject obj = CLInterpreter.Interpret("(75*4+10*(7-2)-1)");
 
