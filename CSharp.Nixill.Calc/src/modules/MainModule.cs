@@ -85,16 +85,42 @@ namespace Nixill.CalcLib.Modules {
     #endregion
 
     #region // BIN - FUNCTION //
-    public static CLBinaryOperator LoadBinaryMinus(int priority = PlusPriority, bool valOnLeft = true, bool valOnRight = true) {
+    public static CLBinaryOperator LoadBinaryMinus(int priority = 0, bool valOnLeft = true, bool valOnRight = true) {
       BinaryMinus = CLOperators.BinaryOperators.GetOrNull("-") ?? new CLBinaryOperator("-", priority, valOnLeft, valOnRight);
-      BinaryMinus.AddFunction(tVal, tVal, BinMinus);
+      BinaryMinus.AddFunction(tNum, tNum, BinMinusNumbers);
+      BinaryMinus.AddFunction(tVal, tLst, (left, right, vars, context) => BinMinusLists(ValToList(left), right, vars, context));
+      BinaryMinus.AddFunction(tLst, tVal, (left, right, vars, context) => BinMinusLists(left, ValToList(right), vars, context));
+      BinaryMinus.AddFunction(tLst, tLst, BinMinusLists);
 
       return BinaryMinus;
     }
 
-    // Subtracts one value from another.
-    public static CalcValue BinMinus(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
-      return BinaryPlus.Run(left, PrefixMinus.Run(right, vars, context), vars, context);
+    // Adds two numbers.
+    public static CalcValue BinMinusNumbers(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
+      CalcNumber numLeft = left as CalcNumber;
+      CalcNumber numRight = right as CalcNumber;
+
+      return new CalcNumber(numLeft - numRight);
+    }
+
+    // Concatenates two lists.
+    public static CalcValue BinMinusLists(CalcObject left, CalcObject right, CLLocalStore vars, CLContextProvider context) {
+      CalcList lstLeft = left as CalcList;
+      CalcList lstRight = PreMinusList(right, vars, context) as CalcList;
+
+      CalcValue[] lstRet = new CalcValue[lstLeft.Count + lstRight.Count];
+
+      int i;
+
+      for (i = 0; i < lstLeft.Count; i++) {
+        lstRet[i] = lstLeft[i];
+      }
+
+      for (int j = 0; j < lstRight.Count; j++) {
+        lstRet[i + j] = lstRight[j];
+      }
+
+      return new CalcList(lstRet);
     }
     #endregion
 
