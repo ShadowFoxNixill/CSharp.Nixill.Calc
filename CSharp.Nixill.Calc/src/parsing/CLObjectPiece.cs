@@ -1,8 +1,10 @@
-namespace Nixill.CalcLib.Parsing {
+namespace Nixill.CalcLib.Parsing
+{
   /// <summary>
   /// Represents a single piece of a <c>CalcObject</c>.
   /// </summary>
-  public struct CLObjectPiece {
+  public struct CLObjectPiece
+  {
     /// <summary>The text of the piece.</summary>
     public string Contents { get; }
     /// <summary>What type the piece is.</summary>
@@ -15,7 +17,8 @@ namespace Nixill.CalcLib.Parsing {
     /// <summary>
     /// Creates a new <c>CLObjectPiece</c>.
     /// </summary>
-    public CLObjectPiece(string contents, CLObjectPieceType type, int position) {
+    public CLObjectPiece(string contents, CLObjectPieceType type, int position)
+    {
       Contents = contents;
       Type = type;
       Position = position;
@@ -25,7 +28,8 @@ namespace Nixill.CalcLib.Parsing {
   /// <summary>
   /// Represents the types of pieces of an <c>CalcObject</c>.
   /// </summary>
-  public enum CLObjectPieceType {
+  public enum CLObjectPieceType
+  {
     /// <summary>
     /// A number, made from just digits and a decimal point.
     /// </summary>

@@ -4,22 +4,29 @@ using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Varaibles;
 
-namespace Nixill.CalcLib.Operators {
+namespace Nixill.CalcLib.Operators
+{
   /// <summary>
   /// Provides a set of eight <c>CLComparisonOperator</c>s that share a
   ///   common function.
   /// </summary>
-  public class CLComparisonOperatorSet : IEnumerable<CLComparisonOperator> {
+  public class CLComparisonOperatorSet : IEnumerable<CLComparisonOperator>
+  {
     private Dictionary<Type, Dictionary<Type, CLComparisonFunc>> Functions = new Dictionary<Type, Dictionary<Type, CLComparisonFunc>>();
 
     /// <summary>
     /// Returns the function that'll be run for the given types.
     /// </summary>
-    public CLComparisonFunc this[Type left, Type right] {
-      get {
-        for (; left != typeof(object); left = left.BaseType) {
-          if (Functions.ContainsKey(left)) {
-            for (Type r = right; r != typeof(object); r = r.BaseType) {
+    public CLComparisonFunc this[Type left, Type right]
+    {
+      get
+      {
+        for (; left != typeof(object); left = left.BaseType)
+        {
+          if (Functions.ContainsKey(left))
+          {
+            for (Type r = right; r != typeof(object); r = r.BaseType)
+            {
               if (Functions.ContainsKey(right)) return Functions[left][right];
             }
           }
@@ -33,8 +40,10 @@ namespace Nixill.CalcLib.Operators {
     /// Returns the specific <c>CLComparisonOperator</c> for a given
     /// <c>CLComparison</c>.
     /// </summary>
-    public CLComparisonOperator this[CLComparison oper] {
-      get {
+    public CLComparisonOperator this[CLComparison oper]
+    {
+      get
+      {
         if (oper == CLComparison.Greater) return Greater;
         else if (oper == CLComparison.Equal) return Equal;
         else if (oper == CLComparison.Less) return Less;
@@ -92,7 +101,8 @@ namespace Nixill.CalcLib.Operators {
     /// </summary>
     public CLComparisonOperator NotModulo { get; }
 
-    public IEnumerator<CLComparisonOperator> GetEnumerator() {
+    public IEnumerator<CLComparisonOperator> GetEnumerator()
+    {
       yield return Greater;
       yield return Equal;
       yield return Less;
@@ -103,7 +113,8 @@ namespace Nixill.CalcLib.Operators {
       yield return NotModulo;
     }
 
-    IEnumerator IEnumerable.GetEnumerator() {
+    IEnumerator IEnumerable.GetEnumerator()
+    {
       return GetEnumerator();
     }
 
@@ -124,7 +135,8 @@ namespace Nixill.CalcLib.Operators {
     /// Whether or not these <c>CLComparisonOperators</c> are value-based
     /// on their right sides.
     /// </param>
-    public CLComparisonOperatorSet(string prefix, int priority, bool valLeft, bool valRight) {
+    public CLComparisonOperatorSet(string prefix, int priority, bool valLeft, bool valRight)
+    {
       PrefixSymbol = prefix;
       Priority = priority;
       ValueBasedLeft = valLeft;
@@ -152,10 +164,12 @@ namespace Nixill.CalcLib.Operators {
     /// Iff <c>true</c>, the functions that handle types more derived than
     /// <c>left</c> and <c>right</c> should be removed from this operator.
     /// </param>
-    public virtual void AddFunction(Type left, Type right, CLComparisonFunc func, bool replaceChildren = true) {
+    public virtual void AddFunction(Type left, Type right, CLComparisonFunc func, bool replaceChildren = true)
+    {
       Dictionary<Type, CLComparisonFunc> subDict;
 
-      if (!Functions.ContainsKey(left)) {
+      if (!Functions.ContainsKey(left))
+      {
         subDict = new Dictionary<Type, CLComparisonFunc>();
         Functions[left] = subDict;
       }
@@ -164,11 +178,16 @@ namespace Nixill.CalcLib.Operators {
       subDict[right] = func;
 
       // Now replace all the child types if necessary.
-      if (replaceChildren) {
-        foreach (Type leftTest in Functions.Keys) {
-          if (leftTest.IsSubclassOf(left) || leftTest == left) {
-            foreach (Type rightTest in Functions[leftTest].Keys) {
-              if (rightTest.IsSubclassOf(right) || (rightTest == right && leftTest != left)) {
+      if (replaceChildren)
+      {
+        foreach (Type leftTest in Functions.Keys)
+        {
+          if (leftTest.IsSubclassOf(left) || leftTest == left)
+          {
+            foreach (Type rightTest in Functions[leftTest].Keys)
+            {
+              if (rightTest.IsSubclassOf(right) || (rightTest == right && leftTest != left))
+              {
                 Functions[left].Remove(right);
               }
             }
@@ -183,7 +202,8 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// A single comparison, with its own symbol and comparison condition.
   /// </summary>
-  public class CLComparison {
+  public class CLComparison
+  {
     /// <summary>The symbol for the comparison.</summary>
     public string PostfixSymbol { get; }
     /// <summary>
@@ -197,7 +217,8 @@ namespace Nixill.CalcLib.Operators {
     /// </summary>
     public CLComparison Opposite { get; private set; }
 
-    private CLComparison(string symbol, Func<decimal, decimal, bool> func) {
+    private CLComparison(string symbol, Func<decimal, decimal, bool> func)
+    {
       PostfixSymbol = symbol;
       CompareFunction = func;
     }
@@ -205,7 +226,8 @@ namespace Nixill.CalcLib.Operators {
     /// <summary>
     /// Returns an iterator over all <c>CLComparison</c>s.
     /// </summary>
-    public static IEnumerator<CLComparison> GetEnumerator() {
+    public static IEnumerator<CLComparison> GetEnumerator()
+    {
       yield return Greater;
       yield return Equal;
       yield return Less;
@@ -265,7 +287,8 @@ namespace Nixill.CalcLib.Operators {
     public static readonly CLComparison NotModulo = new CLComparison("!%", (left, right) => left % right != 0);
 
     // set all the opposites to each other
-    static CLComparison() {
+    static CLComparison()
+    {
       Greater.Opposite = NotGreater;
       NotGreater.Opposite = Greater;
       Less.Opposite = NotLess;
@@ -283,7 +306,8 @@ namespace Nixill.CalcLib.Operators {
   /// </summary>
   /// <seealso cref="CLBinaryOperator"/>
   /// <seealso cref="CLComparisonOperatorSet"/>
-  public class CLComparisonOperator : CLBinaryOperator {
+  public class CLComparisonOperator : CLBinaryOperator
+  {
     /// <summary>
     /// The <c>CLComparisonOperatorSet</c> of which this
     /// <c>CLComparisonOperator</c> is a part.
@@ -302,8 +326,10 @@ namespace Nixill.CalcLib.Operators {
     /// </summary>
     public CLComparison Comparison { get; internal set; }
 
-    public override CLBinaryOperatorFunc this[Type left, Type right] {
-      get {
+    public override CLBinaryOperatorFunc this[Type left, Type right]
+    {
+      get
+      {
         CLComparisonFunc func = Parent[left, right];
 
         if (func != null) return (l, r, vars, context) => func(l, Comparison, r, vars, context);
@@ -312,7 +338,8 @@ namespace Nixill.CalcLib.Operators {
     }
 
     internal CLComparisonOperator(CLComparisonOperatorSet set, CLComparison comp) :
-      base(set.PrefixSymbol + comp.PostfixSymbol, set.Priority, set.ValueBasedLeft, set.ValueBasedRight) {
+      base(set.PrefixSymbol + comp.PostfixSymbol, set.Priority, set.ValueBasedLeft, set.ValueBasedRight)
+    {
       Parent = set;
       Comparison = comp;
     }
@@ -321,7 +348,8 @@ namespace Nixill.CalcLib.Operators {
     /// Throws an <c>InvalidOperationException</c>. To add a function, go
     /// through the <c>Parent</c> instead.
     /// </summary>
-    public override void AddFunction(Type left, Type right, CLBinaryOperatorFunc func, bool replaceChildren) {
+    public override void AddFunction(Type left, Type right, CLBinaryOperatorFunc func, bool replaceChildren)
+    {
       throw new InvalidOperationException("For a CLComparisonOperator, functions must be added through the set.");
     }
   }

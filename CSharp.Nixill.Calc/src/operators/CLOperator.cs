@@ -8,15 +8,18 @@ using Nixill.CalcLib.Parsing;
 using Nixill.CalcLib.Varaibles;
 using Nixill.Utils;
 
-namespace Nixill.CalcLib.Operators {
-  public static class CLOperators {
+namespace Nixill.CalcLib.Operators
+{
+  public static class CLOperators
+  {
     private static HashSet<int> FromRightOperators = new HashSet<int>();
 
     /// <summary>
     /// Sets a given priority level to group right-to-left.
     /// </summary>
     /// <param name="level">The level to set.</param>
-    public static void SetFromRight(int level) {
+    public static void SetFromRight(int level)
+    {
       FromRightOperators.Add(level);
     }
 
@@ -24,7 +27,8 @@ namespace Nixill.CalcLib.Operators {
     /// Sets a given priority level to group left-to-right.
     /// </summary>
     /// <param name="level">The level to set.</param>
-    public static void UnsetFromRight(int level) {
+    public static void UnsetFromRight(int level)
+    {
       FromRightOperators.Remove(level);
     }
 
@@ -41,34 +45,42 @@ namespace Nixill.CalcLib.Operators {
     private static Regex rgxSymbol = new Regex(@"([^a-zA-Z0-9])");
     internal static bool rgxInitiated = false;
 
-    public static List<CLObjectPiece> GetOpers(string input, bool prefix, bool postfix, int pos) {
+    public static List<CLObjectPiece> GetOpers(string input, bool prefix, bool postfix, int pos)
+    {
       // Remove whitespace
       input = CLLexer.rgxWhitespaceReplace.Replace(input, "");
 
       // Otherwise let's go through the group to see if we can split it into many
-      if (prefix) {
+      if (prefix)
+      {
         return RecursiveGetPrefixOpers(input, pos);
       }
-      else if (postfix) {
+      else if (postfix)
+      {
         return RecursiveGetPostfixOpers(input, pos);
       }
-      else {
+      else
+      {
         return RecursiveGetOpers(input, pos);
       }
     }
 
     // Recursively gets prefix operators from the list
-    private static List<CLObjectPiece> RecursiveGetPrefixOpers(string input, int pos) {
+    private static List<CLObjectPiece> RecursiveGetPrefixOpers(string input, int pos)
+    {
       if (PrefixOperators.ContainsKey(input))
         return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.PrefixOperator, pos));
 
-      for (int i = 1; i < input.Length; i++) {
+      for (int i = 1; i < input.Length; i++)
+      {
         string thisOper = input[0..i];
         string remOper = input[i..^0];
 
-        if (PrefixOperators.ContainsKey(thisOper)) {
+        if (PrefixOperators.ContainsKey(thisOper))
+        {
           var list = RecursiveGetPrefixOpers(remOper, pos + thisOper.Length);
-          if (list != null) {
+          if (list != null)
+          {
             list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PrefixOperator, pos));
             return list;
           }
@@ -79,25 +91,31 @@ namespace Nixill.CalcLib.Operators {
     }
 
     // Recursively gets prefix operators from the list
-    private static List<CLObjectPiece> RecursiveGetOpers(string input, int pos) {
+    private static List<CLObjectPiece> RecursiveGetOpers(string input, int pos)
+    {
       if (BinaryOperators.ContainsKey(input))
         return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.BinaryOperator, pos));
 
-      for (int i = 1; i < input.Length; i++) {
+      for (int i = 1; i < input.Length; i++)
+      {
         string thisOper = input[0..i];
         string remOper = input[i..^0];
 
-        if (BinaryOperators.ContainsKey(thisOper)) {
+        if (BinaryOperators.ContainsKey(thisOper))
+        {
           var list = RecursiveGetPrefixOpers(remOper, pos + thisOper.Length);
-          if (list != null) {
+          if (list != null)
+          {
             list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.BinaryOperator, pos));
             return list;
           }
         }
 
-        else if (PostfixOperators.ContainsKey(thisOper)) {
+        else if (PostfixOperators.ContainsKey(thisOper))
+        {
           var list = RecursiveGetOpers(remOper, pos + thisOper.Length);
-          if (list != null) {
+          if (list != null)
+          {
             list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PostfixOperator, pos));
             return list;
           }
@@ -108,17 +126,21 @@ namespace Nixill.CalcLib.Operators {
     }
 
     // Recursively gets prefix operators from the list
-    private static List<CLObjectPiece> RecursiveGetPostfixOpers(string input, int pos) {
+    private static List<CLObjectPiece> RecursiveGetPostfixOpers(string input, int pos)
+    {
       if (PostfixOperators.ContainsKey(input))
         return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.PostfixOperator, pos));
 
-      for (int i = 1; i < input.Length; i++) {
+      for (int i = 1; i < input.Length; i++)
+      {
         string thisOper = input[0..i];
         string remOper = input[i..^0];
 
-        if (PostfixOperators.ContainsKey(thisOper)) {
+        if (PostfixOperators.ContainsKey(thisOper))
+        {
           var list = RecursiveGetPostfixOpers(remOper, pos + thisOper.Length);
-          if (list != null) {
+          if (list != null)
+          {
             list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PostfixOperator, pos));
             return list;
           }
@@ -129,9 +151,11 @@ namespace Nixill.CalcLib.Operators {
     }
 
     // Takes the keys from a dictionary and turns them into a regex that matches any one key
-    private static string KeysToPattern(string[] keys) {
+    private static string KeysToPattern(string[] keys)
+    {
       string ret = "";
-      foreach (string key in keys) {
+      foreach (string key in keys)
+      {
         ret += "|" + rgxSymbol.Replace(key, @"\$1");
       }
       if (ret == "") return "()";
@@ -139,17 +163,20 @@ namespace Nixill.CalcLib.Operators {
     }
   }
 
-  public class CLOperatorList<T> where T : CLOperator {
+  public class CLOperatorList<T> where T : CLOperator
+  {
     private Dictionary<string, T> OperList = new Dictionary<string, T>();
 
-    public T this[string key] {
+    public T this[string key]
+    {
       get => OperList[key];
       internal set => OperList[key] = value;
     }
 
     public bool ContainsKey(string key) => OperList.ContainsKey(key);
 
-    public T GetOrNull(string key) {
+    public T GetOrNull(string key)
+    {
       if (ContainsKey(key)) return OperList[key];
       else return null;
     }
@@ -157,8 +184,10 @@ namespace Nixill.CalcLib.Operators {
     public string[] Keys => OperList.Keys.ToArray();
   }
 
-  public abstract class CLOperator {
-    internal CLOperator(string symbol, int priority) {
+  public abstract class CLOperator
+  {
+    internal CLOperator(string symbol, int priority)
+    {
       Priority = priority;
       Symbol = symbol;
 
@@ -182,7 +211,8 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents a binary (two-operand) <c>CLOperator</c>.
   /// </summary>
-  public class CLBinaryOperator : CLOperator {
+  public class CLBinaryOperator : CLOperator
+  {
     private Dictionary<Type, Dictionary<Type, CLBinaryOperatorFunc>> Functions = new Dictionary<Type, Dictionary<Type, CLBinaryOperatorFunc>>();
 
     /// <summary>
@@ -200,11 +230,16 @@ namespace Nixill.CalcLib.Operators {
     /// <summary>
     /// Returns the function that'll be run for the given types.
     /// </summary>
-    public virtual CLBinaryOperatorFunc this[Type left, Type right] {
-      get {
-        for (; left != typeof(object); left = left.BaseType) {
-          if (Functions.ContainsKey(left)) {
-            for (Type r = right; r != typeof(object); r = r.BaseType) {
+    public virtual CLBinaryOperatorFunc this[Type left, Type right]
+    {
+      get
+      {
+        for (; left != typeof(object); left = left.BaseType)
+        {
+          if (Functions.ContainsKey(left))
+          {
+            for (Type r = right; r != typeof(object); r = r.BaseType)
+            {
               if (Functions[left].ContainsKey(r)) return Functions[left][r];
             }
           }
@@ -225,7 +260,8 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="valRight">
     /// Whether or not the operator is value-based on its right side.
     /// </param>
-    public CLBinaryOperator(string symbol, int priority, bool valLeft, bool valRight) : base(symbol, priority) {
+    public CLBinaryOperator(string symbol, int priority, bool valLeft, bool valRight) : base(symbol, priority)
+    {
       ValueBasedLeft = valLeft;
       ValueBasedRight = valRight;
     }
@@ -235,7 +271,8 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="right">The right operand.</param>
     /// <param name="vars">The local variable storage.</param>
     /// <param name="context">An object representing context.</param>
-    public CalcValue Run(CalcObject left, CalcObject right, CLLocalStore vars = null, CLContextProvider context = null) {
+    public CalcValue Run(CalcObject left, CalcObject right, CLLocalStore vars = null, CLContextProvider context = null)
+    {
       // If the operator is value-based, we'll automatically convert expressions.
       if (ValueBasedLeft) left = left.GetValue(vars, context);
       if (ValueBasedRight) right = right.GetValue(vars, context);
@@ -264,10 +301,12 @@ namespace Nixill.CalcLib.Operators {
     /// Iff <c>true</c>, the functions that handle types more derived than
     /// <c>left</c> and <c>right</c> should be removed from this operator.
     /// </param>
-    public virtual void AddFunction(Type left, Type right, CLBinaryOperatorFunc func, bool replaceChildren = true) {
+    public virtual void AddFunction(Type left, Type right, CLBinaryOperatorFunc func, bool replaceChildren = true)
+    {
       Dictionary<Type, CLBinaryOperatorFunc> subDict;
 
-      if (!Functions.ContainsKey(left)) {
+      if (!Functions.ContainsKey(left))
+      {
         subDict = new Dictionary<Type, CLBinaryOperatorFunc>();
         Functions[left] = subDict;
       }
@@ -276,11 +315,16 @@ namespace Nixill.CalcLib.Operators {
       subDict[right] = func;
 
       // Now replace all the child types if necessary.
-      if (replaceChildren) {
-        foreach (Type leftTest in Functions.Keys) {
-          if (leftTest.IsSubclassOf(left) || leftTest == left) {
-            foreach (Type rightTest in Functions[leftTest].Keys) {
-              if (rightTest.IsSubclassOf(right) || (rightTest == right && leftTest != left)) {
+      if (replaceChildren)
+      {
+        foreach (Type leftTest in Functions.Keys)
+        {
+          if (leftTest.IsSubclassOf(left) || leftTest == left)
+          {
+            foreach (Type rightTest in Functions[leftTest].Keys)
+            {
+              if (rightTest.IsSubclassOf(right) || (rightTest == right && leftTest != left))
+              {
                 Functions[left].Remove(right);
               }
             }
@@ -297,7 +341,8 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents a unary (one-operand) <c>CLOperator</c>.
   /// </summary>
-  public class CLUnaryOperator : CLOperator {
+  public class CLUnaryOperator : CLOperator
+  {
     private Dictionary<Type, CLUnaryOperatorFunc> Functions = new Dictionary<Type, CLUnaryOperatorFunc>();
 
     /// <summary>
@@ -312,9 +357,12 @@ namespace Nixill.CalcLib.Operators {
     /// </summary>
     public bool IsPrefix { get; }
 
-    public CLUnaryOperatorFunc this[Type param] {
-      get {
-        for (; param != typeof(object); param = param.BaseType) {
+    public CLUnaryOperatorFunc this[Type param]
+    {
+      get
+      {
+        for (; param != typeof(object); param = param.BaseType)
+        {
           if (Functions.ContainsKey(param)) return Functions[param];
         }
 
@@ -330,7 +378,8 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="valBased">
     /// Whether or not the operator is value-based.
     /// </param>
-    public CLUnaryOperator(string symbol, int priority, bool isPrefix, bool valBased) : base(symbol, priority) {
+    public CLUnaryOperator(string symbol, int priority, bool isPrefix, bool valBased) : base(symbol, priority)
+    {
       IsPrefix = isPrefix;
       ValueBased = valBased;
     }
@@ -339,7 +388,8 @@ namespace Nixill.CalcLib.Operators {
     /// <param name="param">The right operand.</param>
     /// <param name="vars">The local variable storage.</param>
     /// <param name="context">An object representing context.</param>
-    public CalcValue Run(CalcObject param, CLLocalStore vars = null, CLContextProvider context = null) {
+    public CalcValue Run(CalcObject param, CLLocalStore vars = null, CLContextProvider context = null)
+    {
       // If the operator is value-based, we'll automatically convert expressions.
       if (ValueBased) param = param.GetValue(vars, context);
 
@@ -364,13 +414,17 @@ namespace Nixill.CalcLib.Operators {
     /// Iff <c>true</c>, the functions that handle types more derived than
     /// <c>param</c> should be removed from this operator.
     /// </param>
-    public void AddFunction(Type param, CLUnaryOperatorFunc func, bool replaceChildren = true) {
+    public void AddFunction(Type param, CLUnaryOperatorFunc func, bool replaceChildren = true)
+    {
       Functions[param] = func;
 
       // Now replace all the child types if necessary.
-      if (replaceChildren) {
-        foreach (Type paramTest in Functions.Keys) {
-          if (paramTest.IsSubclassOf(param)) {
+      if (replaceChildren)
+      {
+        foreach (Type paramTest in Functions.Keys)
+        {
+          if (paramTest.IsSubclassOf(param))
+          {
             Functions.Remove(param);
           }
         }
@@ -385,7 +439,8 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents a prefix-based <c>CLUnaryOperator</c>.
   /// </summary>
-  public class CLPrefixOperator : CLUnaryOperator {
+  public class CLPrefixOperator : CLUnaryOperator
+  {
     /// <summary>
     /// Creates a new <c>CLPrefixOperator</c>.
     /// </summary>
@@ -400,7 +455,8 @@ namespace Nixill.CalcLib.Operators {
   /// <summary>
   /// Represents a postfix-based <c>CLUnaryOperator</c>.
   /// </summary>
-  public class CLPostfixOperator : CLUnaryOperator {
+  public class CLPostfixOperator : CLUnaryOperator
+  {
     /// <summary>
     /// Creates a new <c>CLPostfixOperator</c>.
     /// </summary>

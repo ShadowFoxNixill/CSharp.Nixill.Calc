@@ -7,12 +7,14 @@ using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Operators;
 using System.Linq;
 
-namespace Nixill.CalcLib.Objects {
+namespace Nixill.CalcLib.Objects
+{
   /// <summary>
   /// Base class for <c>CalcObject</c>s that are not <c>CalcValue</c>s.
   /// </summary>
   /// <seealso cref="CalcValue"/>
-  public abstract class CalcExpression : CalcObject {
+  public abstract class CalcExpression : CalcObject
+  {
     /// <summary>
     /// Determines if two <c>CalcExpression</c>s are equal by comparing
     /// their code representations. (<c>CalcExpression</c>s are not equal
@@ -20,7 +22,8 @@ namespace Nixill.CalcLib.Objects {
     /// </summary>
     /// <param name="obj">The object to compare to.</param>
     /// <seealso cref="ToCode()"/>
-    public sealed override bool Equals(object obj) {
+    public sealed override bool Equals(object obj)
+    {
       if (!(obj is CalcExpression ccf)) return false;
 
       return ToCode() == ccf.ToCode();
@@ -46,7 +49,8 @@ namespace Nixill.CalcLib.Objects {
   ///   CalcLib expressions.
   /// </summary>
   /// <inheritdoc/>
-  public class CalcCodeFunction : CalcExpression {
+  public class CalcCodeFunction : CalcExpression
+  {
     /// <summary>
     /// The <c>CLCodeFunction</c> backing this <c>CalcCodeFunction</c>.
     /// </summary>
@@ -69,12 +73,14 @@ namespace Nixill.CalcLib.Objects {
     /// </summary>
     /// <param name="name">The name of the function to call.</param>
     /// <param name="pars">The parameters for the called function.</param>
-    public CalcCodeFunction(string name, CalcObject[] pars) {
+    public CalcCodeFunction(string name, CalcObject[] pars)
+    {
       Function = CLCodeFunction.Get(name);
       Params = pars;
     }
 
-    public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null) {
+    public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null)
+    {
       vars ??= new CLLocalStore();
       context ??= new CLContextProvider();
       return Function.FunctionDef.Invoke(Params, vars, context);
@@ -83,10 +89,12 @@ namespace Nixill.CalcLib.Objects {
     public override string ToCode() =>
       "{!" + Function.Name + string.Join("", Params.Select(x => "," + x.ToCode())) + "}";
 
-    public override string ToString(int level) {
+    public override string ToString(int level)
+    {
       string ret = "{!" + Function.Name;
 
-      if (Params.Any()) {
+      if (Params.Any())
+      {
         if (level == 0) ret += ", ...";
         else ret += string.Join("", Params.Select(x => ", " + x.ToString(level - 1)));
       }
@@ -94,12 +102,14 @@ namespace Nixill.CalcLib.Objects {
       return ret + "}";
     }
 
-    public override string ToTree(int level) {
+    public override string ToTree(int level)
+    {
       string ret = new string(' ', level * 2) + "CodeFunction: " + Function.Name;
 
       if (Params.Length == 0) return ret + " (no params)";
 
-      foreach (CalcObject obj in Params) {
+      foreach (CalcObject obj in Params)
+      {
         ret += "\n" + obj.ToTree(level + 1);
       }
 
@@ -110,7 +120,8 @@ namespace Nixill.CalcLib.Objects {
   /// <summary>
   /// A list of <c>CalcObject</c>s.
   /// </summary>
-  public class CalcListExpression : CalcExpression, IEnumerable<CalcObject> {
+  public class CalcListExpression : CalcExpression, IEnumerable<CalcObject>
+  {
     private CalcObject[] _list;
 
     /// <summary>
@@ -127,27 +138,32 @@ namespace Nixill.CalcLib.Objects {
 
     /// <summary>Creates a new <c>CalcList</c>.</summary>
     /// <param name="list">The list to copy.</param>
-    public CalcListExpression(CalcObject[] list) {
+    public CalcListExpression(CalcObject[] list)
+    {
       _list = new CalcObject[list.Length];
-      for (int i = 0; i < list.Length; i++) {
+      for (int i = 0; i < list.Length; i++)
+      {
         _list[i] = list[i];
       }
     }
 
-    public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null) {
+    public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null)
+    {
       vars ??= new CLLocalStore();
       context ??= new CLContextProvider();
 
       CalcValue[] ret = new CalcValue[_list.Length];
 
-      for (int i = 0; i < _list.Length; i++) {
+      for (int i = 0; i < _list.Length; i++)
+      {
         ret[i] = _list[i].GetValue(vars);
       }
 
       return new CalcList(ret);
     }
 
-    public override string ToString(int level) {
+    public override string ToString(int level)
+    {
       string ret = "[";
 
       if (level == 0) ret += " ... ";
@@ -159,12 +175,14 @@ namespace Nixill.CalcLib.Objects {
     public override string ToCode() =>
       "[" + string.Join(",", _list.Select(x => x.ToCode())) + "]";
 
-    public override string ToTree(int level) {
+    public override string ToTree(int level)
+    {
       string ret = new string(' ', level * 2) + "ListExpression:";
 
       if (_list.Length == 0) return ret + " (empty)";
 
-      foreach (CalcObject obj in _list) {
+      foreach (CalcObject obj in _list)
+      {
         ret += "\n" + obj.ToTree(level + 1);
       }
 
@@ -176,7 +194,8 @@ namespace Nixill.CalcLib.Objects {
   /// A named function or variable referring to a stored
   ///   <c>CalcObject</c>.
   /// </summary>
-  public class CalcFunction : CalcExpression {
+  public class CalcFunction : CalcExpression
+  {
     /// <summary>The name of the function.</summary>
     public string Name { get; private set; }
     private CalcObject[] Params;
@@ -195,7 +214,8 @@ namespace Nixill.CalcLib.Objects {
     /// </summary>
     /// <param name="name">The name of the function to call.</param>
     /// <param name="pars">The parameters for the called function.</param>
-    public CalcFunction(string name, CalcObject[] pars) {
+    public CalcFunction(string name, CalcObject[] pars)
+    {
       Name = name.ToLower();
       Params = pars;
     }
@@ -207,30 +227,36 @@ namespace Nixill.CalcLib.Objects {
     ///   variables.</param>
     /// <param name="context">The object representing the context in which
     ///   the expression is being evaluated.</param>
-    public CalcObject GetObject(CLLocalStore vars = null, CLContextProvider context = null) {
+    public CalcObject GetObject(CLLocalStore vars = null, CLContextProvider context = null)
+    {
       vars ??= new CLLocalStore();
       context ??= new CLContextProvider();
 
-      if (Name.StartsWith("!")) {
-        if (CLCodeFunction.Exists(Name.Substring(1))) {
+      if (Name.StartsWith("!"))
+      {
+        if (CLCodeFunction.Exists(Name.Substring(1)))
+        {
           return new CalcCodeFunction(Name.Substring(1), Params);
         }
       }
 
-      if (Name.StartsWith("_") || Name.StartsWith("^")) {
+      if (Name.StartsWith("_") || Name.StartsWith("^"))
+      {
         if (!(vars.ContainsVar(Name))) throw new CLException("No variable named " + Name + " exists.");
         else return vars[Name];
       }
 
       int count = 0;
-      if (Int32.TryParse(Name, out count)) {
+      if (Int32.TryParse(Name, out count))
+      {
         if (count == 0) return new CalcString(Name);
         if (vars.ParamCount >= count) return vars[count - 1];
         else if (Params.Length > 0) return Params[0];
         else throw new CLException("No parameter #" + count + " exists.");
       }
 
-      if (Name == "...") {
+      if (Name == "...")
+      {
         return new CalcListExpression(vars.CopyParams());
       }
 
@@ -240,7 +266,8 @@ namespace Nixill.CalcLib.Objects {
       throw new CLException("No variable named " + Name + " exists.");
     }
 
-    public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null) {
+    public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null)
+    {
       vars ??= new CLLocalStore();
       context ??= new CLContextProvider();
 
@@ -254,10 +281,12 @@ namespace Nixill.CalcLib.Objects {
     public override string ToCode() =>
       "{" + Name + string.Join("", Params.Select(x => "," + x.ToCode())) + "}";
 
-    public override string ToString(int level) {
+    public override string ToString(int level)
+    {
       string ret = "{" + Name;
 
-      if (Params.Any()) {
+      if (Params.Any())
+      {
         if (level == 0) ret += ", ...";
         else ret += string.Join("", Params.Select(x => ", " + x.ToString(level - 1)));
       }
@@ -265,12 +294,14 @@ namespace Nixill.CalcLib.Objects {
       return ret + "}";
     }
 
-    public override string ToTree(int level) {
+    public override string ToTree(int level)
+    {
       string ret = new string(' ', level * 2) + "CodeFunction: " + Name;
 
       if (Params.Length == 0) return ret + " (no params)";
 
-      foreach (CalcObject obj in Params) {
+      foreach (CalcObject obj in Params)
+      {
         ret += "\n" + obj.ToTree(level + 1);
       }
 
@@ -281,7 +312,8 @@ namespace Nixill.CalcLib.Objects {
   /// <summary>
   /// A simple operation on one or two <c>CalcValue</c>s.
   /// </summary>
-  public class CalcOperation : CalcExpression {
+  public class CalcOperation : CalcExpression
+  {
     /// <summary>
     /// The value on the left side of the operator. Is null if the
     ///   <c>Operator</c> is a <c>CLPrefixOperator</c>.
@@ -297,19 +329,22 @@ namespace Nixill.CalcLib.Objects {
     /// </summary>
     public CLOperator Operator { get; }
 
-    public CalcOperation(CalcObject left, CLOperator oper, CalcObject right) {
+    public CalcOperation(CalcObject left, CLOperator oper, CalcObject right)
+    {
       Left = left;
       Operator = oper;
       Right = right;
     }
 
-    public override string ToCode() {
+    public override string ToCode()
+    {
       string left = Left?.ToCode() ?? "";
       string right = Right?.ToCode() ?? "";
       return "(" + left + Operator.Symbol + right + ")";
     }
 
-    public override string ToString(int level) {
+    public override string ToString(int level)
+    {
       if (level == 0) return "(...)";
 
       string left = Left?.ToString(level - 1) ?? "";
@@ -318,7 +353,8 @@ namespace Nixill.CalcLib.Objects {
       return "(" + left + Operator.Symbol + right + ")";
     }
 
-    public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null) {
+    public override CalcValue GetValue(CLLocalStore vars = null, CLContextProvider context = null)
+    {
       vars ??= new CLLocalStore();
       context ??= new CLContextProvider();
 
@@ -328,7 +364,8 @@ namespace Nixill.CalcLib.Objects {
       else throw new InvalidCastException("Operators must be binary, prefix, or postfix.");
     }
 
-    public override string ToTree(int level) {
+    public override string ToTree(int level)
+    {
       string ret = new String(' ', level * 2) + "Operation: " + Operator.ToString();
 
       if (Left != null) ret += "\n" + Left.ToTree(level + 1);

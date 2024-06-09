@@ -5,11 +5,13 @@ using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Operators;
 using Nixill.Utils;
 
-namespace Nixill.CalcLib.Parsing {
+namespace Nixill.CalcLib.Parsing
+{
   /// <summary>
   /// Provides a convenience method to lex and parse simultaneously.
   /// </summary>
-  public class CLInterpreter {
+  public class CLInterpreter
+  {
     /// <summary>
     /// Lexes and parses the input (simply by running
     ///   <c>CLParser.Parse</c> on the output of <c>CLLexer.Lex</C>).
@@ -21,7 +23,8 @@ namespace Nixill.CalcLib.Parsing {
   /// <summary>
   /// Lexes the input (splitting it into separate pieces)
   /// </summary>
-  public class CLLexer {
+  public class CLLexer
+  {
     internal static Regex rgxWhitespace = new Regex(@"^[ `\t\n]");
     internal static Regex rgxNumber = new Regex(@"^((0|[1-9]\d*)(\.\d+)?|(\.\d+))");
     internal static Regex rgxSeparator = new Regex(@"^[\(\)\[\]\,\}]");
@@ -32,49 +35,57 @@ namespace Nixill.CalcLib.Parsing {
 
     internal static Regex rgxWhitespaceReplace = new Regex(@"[ `\t\n]");
 
-    public static List<CLObjectPiece> Lex(string input) {
+    public static List<CLObjectPiece> Lex(string input)
+    {
       List<CLObjectPiece> ret = new List<CLObjectPiece>();
       string last = "";
       int pos = 0;
 
-      while (input.Length > 0) {
+      while (input.Length > 0)
+      {
         int move = 0;
         Match match = null;
 
         // See if it's whitespace before any tokens.
-        if (CLUtils.RegexMatches(rgxWhitespace, input, out match)) {
+        if (CLUtils.RegexMatches(rgxWhitespace, input, out match))
+        {
           move = match.Length;
         }
 
         // Is it a number?
-        else if (CLUtils.RegexMatches(rgxNumber, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxNumber, input, out match))
+        {
           last = match.Value;
           ret.Add(new CLObjectPiece(last, CLObjectPieceType.Number, pos));
           move = match.Length;
         }
 
         // Is it a separator?
-        else if (CLUtils.RegexMatches(rgxSeparator, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxSeparator, input, out match))
+        {
           last = match.Value;
           ret.Add(new CLObjectPiece(last, CLObjectPieceType.Spacer, pos));
           move = match.Length;
         }
 
         // Is it a comment?
-        else if (CLUtils.RegexMatches(rgxComment, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxComment, input, out match))
+        {
           move = match.Length;
           // comments aren't included in the syntax tree
         }
 
         // Is it a name?
-        else if (CLUtils.RegexMatches(rgxName, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxName, input, out match))
+        {
           last = match.Value;
           ret.Add(new CLObjectPiece(last, CLObjectPieceType.FunctionName, pos));
           move = match.Length;
         }
 
         // ... Is it an operator, or group thereof?
-        else if (CLUtils.RegexMatches(rgxOperator, input, out match)) {
+        else if (CLUtils.RegexMatches(rgxOperator, input, out match))
+        {
           string opers = rgxWhitespaceReplace.Replace(match.Value, "");
           move = match.Length;
 

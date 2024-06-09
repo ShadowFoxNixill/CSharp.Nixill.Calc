@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 
-namespace Nixill.CalcLib.Varaibles {
+namespace Nixill.CalcLib.Varaibles
+{
   /// <summary>
   /// A storage for local-scoped variables.
   /// </summary>
-  public class CLLocalStore {
+  public class CLLocalStore
+  {
     private Dictionary<string, CalcObject> Vars = new Dictionary<string, CalcObject>();
     private List<CalcObject> Params = new List<CalcObject>();
 
@@ -31,9 +33,11 @@ namespace Nixill.CalcLib.Varaibles {
     /// <summary>
     /// Get or set a parameter in this storage.
     /// </summary>
-    public CalcObject this[int index] {
+    public CalcObject this[int index]
+    {
       get => Params[index];
-      set {
+      set
+      {
         if (index < Params.Count) Params[index] = value;
         else Params.Add(value);
       }
@@ -52,14 +56,16 @@ namespace Nixill.CalcLib.Varaibles {
     /// <summary>
     /// Creates a <c>CLLocalStore</c> with existing parameters.
     /// </summary>
-    public CLLocalStore(List<CalcObject> pars) {
+    public CLLocalStore(List<CalcObject> pars)
+    {
       Params = new List<CalcObject>(pars);
     }
 
     /// <summary>
     /// Creates a <c>CLLocalStore</c> with existing variables.
     /// </summary>
-    public CLLocalStore(Dictionary<string, CalcObject> vars) {
+    public CLLocalStore(Dictionary<string, CalcObject> vars)
+    {
       Vars = new Dictionary<string, CalcObject>(vars);
     }
 
@@ -67,7 +73,8 @@ namespace Nixill.CalcLib.Varaibles {
     /// Creates a <c>CLLocalStore</c> with existing parameters and
     ///   existing variables.
     /// </summary>
-    public CLLocalStore(List<CalcObject> pars, Dictionary<string, CalcObject> vars) {
+    public CLLocalStore(List<CalcObject> pars, Dictionary<string, CalcObject> vars)
+    {
       Params = new List<CalcObject>(pars);
       Vars = new Dictionary<string, CalcObject>(vars);
     }
@@ -75,7 +82,8 @@ namespace Nixill.CalcLib.Varaibles {
     /// <summary>
     /// Creates a <c>CLLocalStore</c> with existing parameters.
     /// </summary>
-    public CLLocalStore(CalcObject[] pars) {
+    public CLLocalStore(CalcObject[] pars)
+    {
       Params = new List<CalcObject>(pars);
     }
 
@@ -83,7 +91,8 @@ namespace Nixill.CalcLib.Varaibles {
     /// Creates a <c>CLLocalStore</c> with existing parameters and
     ///   existing variables.
     /// </summary>
-    public CLLocalStore(CalcObject[] pars, Dictionary<string, CalcObject> vars) {
+    public CLLocalStore(CalcObject[] pars, Dictionary<string, CalcObject> vars)
+    {
       Params = new List<CalcObject>(pars);
       Vars = new Dictionary<string, CalcObject>(vars);
     }

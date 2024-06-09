@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using Nixill.CalcLib.Objects;
 using Nixill.CalcLib.Varaibles;
 
-namespace Nixill.CalcLib.Functions {
+namespace Nixill.CalcLib.Functions
+{
   /// <summary>
   /// Defines the code of a <link cref="CalcCodeFunction">CalcCodeFunction</link>.
   /// </summary>
-  public class CLCodeFunction {
+  public class CLCodeFunction
+  {
     /// <summary>
     /// The function that runs whenever the code function is called.
     /// </summary>
@@ -36,7 +38,8 @@ namespace Nixill.CalcLib.Functions {
     ///   existing
     ///   <link cref="CalcCodeFunction"><c>CalcCodeFunction</c></link>s
     ///   will continue to reference the old <c>CLCodeFunction</c>.</para>
-    public CLCodeFunction(string name, Func<CalcObject[], CLLocalStore, CLContextProvider, CalcValue> funcDef) {
+    public CLCodeFunction(string name, Func<CalcObject[], CLLocalStore, CLContextProvider, CalcValue> funcDef)
+    {
       Name = name;
       FunctionDef = funcDef;
 

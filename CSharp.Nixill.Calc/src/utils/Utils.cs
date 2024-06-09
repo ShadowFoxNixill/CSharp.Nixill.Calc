@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Nixill.Utils {
-  internal class CLUtils {
+namespace Nixill.Utils
+{
+  internal class CLUtils
+  {
     /// <summary>
     /// Returns a <c>List</c> containing just the parameter.
     /// </summary>
     /// <param name="item">The item to include in the <c>List</c>.</param>
-    public static List<R> ListOfOne<R>(R item) {
+    public static List<R> ListOfOne<R>(R item)
+    {
       List<R> ret = new List<R>();
       ret.Add(item);
       return ret;
@@ -24,7 +27,8 @@ namespace Nixill.Utils {
     /// <returns>
     /// <c>true</c> iff <c>test</c> matches <c>pattern</c>.
     /// </returns>
-    public static bool RegexMatches(Regex pattern, string test, out Match match) {
+    public static bool RegexMatches(Regex pattern, string test, out Match match)
+    {
       match = pattern.Match(test);
       return match.Success;
     }
@@ -43,7 +47,8 @@ namespace Nixill.Utils {
     /// <c>true</c> iff <c>potentialDescendant</c> is equal to or a
     ///   subclass of <c>potentialAncestor</c>.
     /// </returns>
-    public static bool IsSameOrSubclass(Type potentialAncestor, Type potentialDescendant) {
+    public static bool IsSameOrSubclass(Type potentialAncestor, Type potentialDescendant)
+    {
       return potentialDescendant == potentialAncestor
            || potentialDescendant.IsSubclassOf(potentialAncestor);
     }

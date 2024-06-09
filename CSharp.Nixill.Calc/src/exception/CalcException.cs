@@ -1,10 +1,12 @@
 using System;
 
-namespace Nixill.CalcLib.Exception {
+namespace Nixill.CalcLib.Exception
+{
   /// <summary>
   /// An exception thrown when a calculation errors.
   /// </summary>
-  public class CLException : System.Exception {
+  public class CLException : System.Exception
+  {
     /// <summary>
     /// Creates a CalcException with a message.
     /// </summary>

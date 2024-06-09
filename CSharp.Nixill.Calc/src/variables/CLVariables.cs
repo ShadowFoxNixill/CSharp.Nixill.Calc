@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Objects;
 
-namespace Nixill.CalcLib.Varaibles {
+namespace Nixill.CalcLib.Varaibles
+{
   /// <summary>
   /// Class that handles saving and loading of non-local variables.
   /// </summary>
-  public static class CLVariables {
+  public static class CLVariables
+  {
     /// <summary>
     /// Fired when an expression attempts to load a variable.
     /// </summary>
@@ -30,18 +32,23 @@ namespace Nixill.CalcLib.Varaibles {
     /// <param name="context">
     /// An object representing the context in which it's run.
     /// </param>
-    public static CalcObject Load(string name, CLContextProvider context) {
-      CLVariableLoad data = new CLVariableLoad() {
+    public static CalcObject Load(string name, CLContextProvider context)
+    {
+      CLVariableLoad data = new CLVariableLoad()
+      {
         Name = name
       };
 
       VariableLoaded.Invoke(context, data);
 
-      if (data.Value == null) {
-        try {
+      if (data.Value == null)
+      {
+        try
+        {
           return InternalStorage[name];
         }
-        catch (KeyNotFoundException e) {
+        catch (KeyNotFoundException e)
+        {
           throw new CLException(e);
         }
       }
@@ -56,8 +63,10 @@ namespace Nixill.CalcLib.Varaibles {
     /// <param name="context">
     /// An object representing the context in which it's run.
     /// </param>
-    public static void Save(string name, CalcObject val, CLContextProvider context) {
-      CLVariableSave data = new CLVariableSave() {
+    public static void Save(string name, CalcObject val, CLContextProvider context)
+    {
+      CLVariableSave data = new CLVariableSave()
+      {
         Name = name,
         Value = val
       };
@@ -74,8 +83,10 @@ namespace Nixill.CalcLib.Varaibles {
     /// <param name="contet">
     /// An object representing the context in which it's run.
     /// </param>
-    public static void Delete(string name, CLContextProvider context) {
-      CLVariableDelete data = new CLVariableDelete() {
+    public static void Delete(string name, CLContextProvider context)
+    {
+      CLVariableDelete data = new CLVariableDelete()
+      {
         Name = name
       };
 
@@ -86,7 +97,8 @@ namespace Nixill.CalcLib.Varaibles {
   }
 
   /// <summary>Event data for when a variable loads.</summary>
-  public class CLVariableLoad {
+  public class CLVariableLoad
+  {
     /// <summary>The name of the variable to load.</summary>
     public string Name { get; internal set; }
     /// <summary>The value of the loaded variable.</summary>
@@ -96,7 +108,8 @@ namespace Nixill.CalcLib.Varaibles {
   }
 
   /// <summary>Event data for when a variable saves.</summary>
-  public class CLVariableSave {
+  public class CLVariableSave
+  {
     /// <summary>The name of the variable to save.</summary>
     public string Name { get; internal set; }
     /// <summary>The value to save as the variable.</summary>
@@ -106,7 +119,8 @@ namespace Nixill.CalcLib.Varaibles {
   }
 
   /// <summary>Event data for when a variable is deleted.</summary>
-  public class CLVariableDelete {
+  public class CLVariableDelete
+  {
     /// <summary>The name of the variable to delete.</summary>
     public string Name { get; internal set; }
     /// <summary>Set this to true when the variable is deleted.</summary>
