@@ -9,6 +9,7 @@ MainModule.LoadBinaryMinus();
 MainModule.LoadBinaryPlus();
 MainModule.LoadBinaryTimes();
 
-CalcObject obj = CLInterpreter.Interpret("(9*(3+2)+25)*9+1");
+CalcObject obj = CLInterpreter.Interpret("(75*4+10*(7-2)-1)");
 
 Console.WriteLine(obj.ToCode());
+Console.WriteLine(obj.GetValue());
