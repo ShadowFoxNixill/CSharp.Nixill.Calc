@@ -96,7 +96,10 @@ namespace Nixill.CalcLib.Operators
     private static IEnumerable<CLObjectPiece> RecursiveGetOpers(string input, int pos)
     {
       if (BinaryOperators.ContainsKey(input))
+      {
         yield return new CLObjectPiece(input, CLObjectPieceType.BinaryOperator, pos);
+        yield break;
+      }
 
       for (int i = 1; i < input.Length; i++)
       {
@@ -131,7 +134,10 @@ namespace Nixill.CalcLib.Operators
     private static IEnumerable<CLObjectPiece> RecursiveGetPostfixOpers(string input, int pos)
     {
       if (PostfixOperators.ContainsKey(input))
+      {
         yield return new CLObjectPiece(input, CLObjectPieceType.PostfixOperator, pos);
+        yield break;
+      }
 
       for (int i = 1; i < input.Length; i++)
       {
