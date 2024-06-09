@@ -35,9 +35,8 @@ namespace Nixill.CalcLib.Parsing
 
     internal static Regex rgxWhitespaceReplace = new Regex(@"[ `\t\n]");
 
-    public static List<CLObjectPiece> Lex(string input)
+    public static IEnumerable<CLObjectPiece> Lex(string input)
     {
-      List<CLObjectPiece> ret = new List<CLObjectPiece>();
       string last = "";
       int pos = 0;
 
@@ -56,7 +55,7 @@ namespace Nixill.CalcLib.Parsing
         else if (CLUtils.RegexMatches(rgxNumber, input, out match))
         {
           last = match.Value;
-          ret.Add(new CLObjectPiece(last, CLObjectPieceType.Number, pos));
+          yield return new CLObjectPiece(last, CLObjectPieceType.Number, pos);
           move = match.Length;
         }
 
@@ -64,7 +63,7 @@ namespace Nixill.CalcLib.Parsing
         else if (CLUtils.RegexMatches(rgxSeparator, input, out match))
         {
           last = match.Value;
-          ret.Add(new CLObjectPiece(last, CLObjectPieceType.Spacer, pos));
+          yield return new CLObjectPiece(last, CLObjectPieceType.Spacer, pos);
           move = match.Length;
         }
 
@@ -79,7 +78,7 @@ namespace Nixill.CalcLib.Parsing
         else if (CLUtils.RegexMatches(rgxName, input, out match))
         {
           last = match.Value;
-          ret.Add(new CLObjectPiece(last, CLObjectPieceType.FunctionName, pos));
+          yield return new CLObjectPiece(last, CLObjectPieceType.FunctionName, pos);
           move = match.Length;
         }
 
@@ -104,8 +103,8 @@ namespace Nixill.CalcLib.Parsing
           if (prefix && postfix) throw new CLSyntaxException("A value was expected between brackets.", pos);
 
           // There might be multiple operators in a row, so let's be sure to get them all.
-          List<CLObjectPiece> pcs = CLOperators.GetOpers(opers, prefix, postfix, pos);
-          ret.AddRange(pcs);
+          foreach (var piece in CLOperators.GetOpers(opers, prefix, postfix, pos))
+            yield return piece;
 
           last = match.Value;
         }
@@ -117,8 +116,6 @@ namespace Nixill.CalcLib.Parsing
         input = input.Substring(move);
         pos += move;
       }
-
-      return ret;
     }
   }
 }

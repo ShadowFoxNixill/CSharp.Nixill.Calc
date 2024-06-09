@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Nixill.CalcLib.Exception;
 using Nixill.CalcLib.Objects;
@@ -8,25 +9,27 @@ using Nixill.CalcLib.Operators;
 namespace Nixill.CalcLib.Parsing
 {
   /// <summary>
-  /// A class that turns a <c>List</c> of pieces into a full tree of
-  ///   <c>CalcObject</c>s.
+  /// A class that turns an <c>IEnumerable</c> of pieces into a full tree
+  ///   of <c>CalcObject</c>s.
   /// </summary>
   public class CLParser
   {
     private static Regex rgxName = new Regex(@"^\{(?:[ `\t\n])*([\$_\^\!]?[a-zA-Z]([a-zA-Z_\-0-9]*[a-zA-Z0-9])?|\d+)");
 
     /// <summary>
-    /// The method that turns a <c>List</c> of pieces into a full tree of
-    ///   <c>CalcObject</c>s.
+    /// The method that turns an <c>IEnumerable</c> of pieces into a full
+    ///   tree of <c>CalcObject</c>s.
     /// </summary>
     /// <param name="pieces">The list of pieces.</param>
-    public static CalcObject Parse(List<CLObjectPiece> pieces)
+    public static CalcObject Parse(IEnumerable<CLObjectPiece> pieces)
     {
-      CalcObject obj = ParseChain(pieces);
+      List<CLObjectPiece> pieceList = pieces.ToList();
 
-      if (pieces.Count > 0)
+      CalcObject obj = ParseChain(pieceList);
+
+      if (pieceList.Count > 0)
       {
-        CLObjectPiece piece = pieces[0];
+        CLObjectPiece piece = pieceList[0];
         throw new CLSyntaxException("Unmatched " + piece.Contents, piece.Position);
       }
 

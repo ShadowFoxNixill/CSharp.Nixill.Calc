@@ -45,7 +45,7 @@ namespace Nixill.CalcLib.Operators
     private static Regex rgxSymbol = new Regex(@"([^a-zA-Z0-9])");
     internal static bool rgxInitiated = false;
 
-    public static List<CLObjectPiece> GetOpers(string input, bool prefix, bool postfix, int pos)
+    public static IEnumerable<CLObjectPiece> GetOpers(string input, bool prefix, bool postfix, int pos)
     {
       // Remove whitespace
       input = CLLexer.rgxWhitespaceReplace.Replace(input, "");
@@ -66,10 +66,13 @@ namespace Nixill.CalcLib.Operators
     }
 
     // Recursively gets prefix operators from the list
-    private static List<CLObjectPiece> RecursiveGetPrefixOpers(string input, int pos)
+    private static IEnumerable<CLObjectPiece> RecursiveGetPrefixOpers(string input, int pos)
     {
       if (PrefixOperators.ContainsKey(input))
-        return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.PrefixOperator, pos));
+      {
+        yield return new CLObjectPiece(input, CLObjectPieceType.PrefixOperator, pos);
+        yield break;
+      }
 
       for (int i = 1; i < input.Length; i++)
       {
@@ -78,23 +81,22 @@ namespace Nixill.CalcLib.Operators
 
         if (PrefixOperators.ContainsKey(thisOper))
         {
-          var list = RecursiveGetPrefixOpers(remOper, pos + thisOper.Length);
-          if (list != null)
-          {
-            list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PrefixOperator, pos));
-            return list;
-          }
+          yield return new CLObjectPiece(thisOper, CLObjectPieceType.PrefixOperator, pos);
+          foreach (var item in RecursiveGetPrefixOpers(remOper, pos + thisOper.Length))
+            yield return item;
+
+          yield break;
         }
       }
 
-      return null;
+      throw new CLSyntaxException($"Unrecognized operator(s): {input}", pos);
     }
 
     // Recursively gets prefix operators from the list
-    private static List<CLObjectPiece> RecursiveGetOpers(string input, int pos)
+    private static IEnumerable<CLObjectPiece> RecursiveGetOpers(string input, int pos)
     {
       if (BinaryOperators.ContainsKey(input))
-        return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.BinaryOperator, pos));
+        yield return new CLObjectPiece(input, CLObjectPieceType.BinaryOperator, pos);
 
       for (int i = 1; i < input.Length; i++)
       {
@@ -103,33 +105,33 @@ namespace Nixill.CalcLib.Operators
 
         if (BinaryOperators.ContainsKey(thisOper))
         {
-          var list = RecursiveGetPrefixOpers(remOper, pos + thisOper.Length);
-          if (list != null)
-          {
-            list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.BinaryOperator, pos));
-            return list;
-          }
+          yield return new CLObjectPiece(thisOper, CLObjectPieceType.BinaryOperator, pos);
+
+          foreach (var piece in RecursiveGetPrefixOpers(remOper, pos + thisOper.Length))
+            yield return piece;
+
+          yield break;
         }
 
         else if (PostfixOperators.ContainsKey(thisOper))
         {
-          var list = RecursiveGetOpers(remOper, pos + thisOper.Length);
-          if (list != null)
-          {
-            list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PostfixOperator, pos));
-            return list;
-          }
+          yield return new CLObjectPiece(thisOper, CLObjectPieceType.PostfixOperator, pos);
+
+          foreach (var piece in RecursiveGetOpers(remOper, pos + thisOper.Length))
+            yield return piece;
+
+          yield break;
         }
       }
 
-      return null;
+      throw new CLSyntaxException($"Unrecognized operator(s): {input}", pos);
     }
 
     // Recursively gets prefix operators from the list
-    private static List<CLObjectPiece> RecursiveGetPostfixOpers(string input, int pos)
+    private static IEnumerable<CLObjectPiece> RecursiveGetPostfixOpers(string input, int pos)
     {
       if (PostfixOperators.ContainsKey(input))
-        return CLUtils.ListOfOne(new CLObjectPiece(input, CLObjectPieceType.PostfixOperator, pos));
+        yield return new CLObjectPiece(input, CLObjectPieceType.PostfixOperator, pos);
 
       for (int i = 1; i < input.Length; i++)
       {
@@ -138,16 +140,16 @@ namespace Nixill.CalcLib.Operators
 
         if (PostfixOperators.ContainsKey(thisOper))
         {
-          var list = RecursiveGetPostfixOpers(remOper, pos + thisOper.Length);
-          if (list != null)
-          {
-            list.Insert(0, new CLObjectPiece(thisOper, CLObjectPieceType.PostfixOperator, pos));
-            return list;
-          }
+          yield return new CLObjectPiece(thisOper, CLObjectPieceType.PostfixOperator, pos);
+
+          foreach (var piece in RecursiveGetPostfixOpers(remOper, pos + thisOper.Length))
+            yield return piece;
+
+          yield break;
         }
       }
 
-      return null;
+      throw new CLSyntaxException($"Unrecognized operator(s): {input}", pos);
     }
 
     // Takes the keys from a dictionary and turns them into a regex that matches any one key
