@@ -89,7 +89,7 @@ namespace Nixill.CalcLib.Operators
         }
       }
 
-      throw new CLSyntaxException($"Unrecognized operator(s): {input}", pos);
+      throw new CLSyntaxException($"Unrecognized prefix operator(s): {input}", pos);
     }
 
     // Recursively gets prefix operators from the list
@@ -149,7 +149,7 @@ namespace Nixill.CalcLib.Operators
         }
       }
 
-      throw new CLSyntaxException($"Unrecognized operator(s): {input}", pos);
+      throw new CLSyntaxException($"Unrecognized postfix operator(s): {input}", pos);
     }
 
     // Takes the keys from a dictionary and turns them into a regex that matches any one key
